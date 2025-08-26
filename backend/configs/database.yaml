@@ -1,0 +1,165 @@
+# YUNAI 数据库配置文件
+# 作者: 小云
+# 版本: v1.0
+# 日期: 2025-08-26
+
+# 开发环境配置
+development:
+  database:
+    host: localhost
+    port: 5432
+    name: yunai_dev
+    user: postgres
+    password: "5201314hdz"
+    sslmode: disable
+    max_open_conns: 25
+    max_idle_conns: 5
+    conn_max_lifetime: 300s
+    
+  redis:
+    host: localhost
+    port: 6379
+    password: ""
+    db: 0
+    pool_size: 10
+    min_idle_conns: 5
+    dial_timeout: 5s
+    read_timeout: 3s
+    write_timeout: 3s
+    
+  migration:
+    path: ./migrations
+    table: schema_migrations
+
+# 测试环境配置
+staging:
+  database:
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5432}
+    name: ${DB_NAME:yunai_stg}
+    user: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:password}
+    sslmode: ${DB_SSLMODE:require}
+    max_open_conns: 50
+    max_idle_conns: 10
+    conn_max_lifetime: 600s
+    
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:""}
+    db: ${REDIS_DB:1}
+    pool_size: 20
+    min_idle_conns: 10
+    dial_timeout: 5s
+    read_timeout: 3s
+    write_timeout: 3s
+    
+  migration:
+    path: ./migrations
+    table: schema_migrations
+
+# 生产环境配置
+production:
+  database:
+    host: ${DB_HOST}
+    port: ${DB_PORT:5432}
+    name: ${DB_NAME}
+    user: ${DB_USER}
+    password: ${DB_PASSWORD}
+    sslmode: ${DB_SSLMODE:require}
+    max_open_conns: 100
+    max_idle_conns: 20
+    conn_max_lifetime: 1800s
+    
+    # 读写分离配置
+    read_replicas:
+      - host: ${DB_READ_HOST_1}
+        port: ${DB_READ_PORT_1:5432}
+        weight: 1
+      - host: ${DB_READ_HOST_2}
+        port: ${DB_READ_PORT_2:5432}
+        weight: 1
+    
+  redis:
+    # Redis Cluster 配置
+    cluster_nodes:
+      - ${REDIS_NODE_1:localhost:7001}
+      - ${REDIS_NODE_2:localhost:7002}
+      - ${REDIS_NODE_3:localhost:7003}
+      - ${REDIS_NODE_4:localhost:7004}
+      - ${REDIS_NODE_5:localhost:7005}
+      - ${REDIS_NODE_6:localhost:7006}
+    password: ${REDIS_PASSWORD}
+    pool_size: 50
+    min_idle_conns: 20
+    dial_timeout: 5s
+    read_timeout: 3s
+    write_timeout: 3s
+    
+  migration:
+    path: ./migrations
+    table: schema_migrations
+
+# 全局配置
+global:
+  # 数据库连接池配置
+  connection_pool:
+    health_check_period: 30s
+    max_conn_idle_time: 30m
+    
+  # 查询超时配置
+  timeouts:
+    query_timeout: 30s
+    transaction_timeout: 60s
+    migration_timeout: 300s
+    
+  # 日志配置
+  logging:
+    slow_query_threshold: 1s
+    log_level: info
+    log_queries: false # 生产环境建议关闭
+    
+  # 监控配置
+  monitoring:
+    enable_metrics: true
+    metrics_interval: 10s
+    
+  # 备份配置
+  backup:
+    enable_auto_backup: true
+    backup_interval: 6h
+    retention_days: 30
+    backup_path: /var/backups/yunai
+    
+# 数据库分区配置
+partitioning:
+  # 按时间分区的表
+  time_partitioned_tables:
+    - table: consumption_records
+      partition_by: created_at
+      partition_interval: 1 month
+      retention_months: 12
+      
+    - table: recharge_records
+      partition_by: created_at
+      partition_interval: 1 month
+      retention_months: 24
+      
+    - table: user_sessions
+      partition_by: created_at
+      partition_interval: 1 week
+      retention_weeks: 4
+
+# 索引优化配置
+indexing:
+  # 自动创建索引
+  auto_index:
+    enable: true
+    threshold_queries: 1000 # 查询次数超过阈值自动创建索引
+    
+  # 索引维护
+  maintenance:
+    reindex_interval: 7d
+    analyze_interval: 1d
+    vacuum_interval: 1d

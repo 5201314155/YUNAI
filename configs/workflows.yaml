@@ -1,0 +1,264 @@
+workflows:
+  # 角色背景图生成工作流
+  character_background_generation:
+    name: "角色背景图生成"
+    description: "为新创建的角色自动生成背景图"
+    version: "1.0"
+    enabled: true
+    trigger:
+      event: "character.created"
+      conditions:
+        - field: "auto_generate_bg"
+          operator: "equals"
+          value: true
+    steps:
+      - name: "生成背景图"
+        type: "ai_generation"
+        model: "stable-diffusion-xl"
+        params:
+          prompt_template: "{{character.description}}, beautiful background, high quality, detailed, cinematic lighting"
+          width: 1024
+          height: 1024
+          steps: 20
+        timeout: 30s
+        retry: 3
+      - name: "保存图片"
+        type: "storage"
+        params:
+          bucket: "character-images"
+          path: "backgrounds/{{character.id}}/bg_{{timestamp}}.png"
+      - name: "更新角色信息"
+        type: "database"
+        params:
+          table: "characters"
+          operation: "update"
+          where:
+            id: "{{character.id}}"
+          data:
+            bg_image: "{{storage.url}}"
+
+  # 角色抠图生成工作流
+  character_cutout_generation:
+    name: "角色抠图生成"
+    description: "为角色生成抠图形象"
+    version: "1.0"
+    enabled: true
+    trigger:
+      event: "character.background_generated"
+    steps:
+      - name: "生成角色图"
+        type: "ai_generation"
+        model: "stable-diffusion-xl"
+        params:
+          prompt_template: "{{character.description}}, full body, transparent background, high quality"
+          width: 512
+          height: 768
+          steps: 25
+        timeout: 30s
+        retry: 3
+      - name: "背景移除"
+        type: "ai_generation"
+        model: "remove-bg-v2"
+        params:
+          input_image: "{{previous.output}}"
+        timeout: 15s
+        retry: 2
+      - name: "保存抠图"
+        type: "storage"
+        params:
+          bucket: "character-images"
+          path: "cutouts/{{character.id}}/cutout_{{timestamp}}.png"
+      - name: "更新角色信息"
+        type: "database"
+        params:
+          table: "characters"
+          operation: "update"
+          where:
+            id: "{{character.id}}"
+          data:
+            cutout_image: "{{storage.url}}"
+
+  # 朋友圈自动发布工作流
+  moments_auto_publish:
+    name: "朋友圈自动发布"
+    description: "AI角色自动生成并发布朋友圈动态"
+    version: "1.0"
+    enabled: true
+    trigger:
+      type: "schedule"
+      cron: "0 */4 * * *"  # 每4小时执行一次
+    steps:
+      - name: "选择活跃角色"
+        type: "database"
+        params:
+          query: |
+            SELECT * FROM characters 
+            WHERE is_active = true 
+            AND last_moment_at < NOW() - INTERVAL '6 hours'
+            ORDER BY RANDOM() 
+            LIMIT 10
+      - name: "生成动态内容"
+        type: "ai_generation"
+        model: "gpt-4-turbo"
+        params:
+          prompt_template: |
+            基于角色设定生成一条朋友圈动态：
+            角色：{{character.name}}
+            人设：{{character.personality}}
+            最近聊天：{{character.recent_chats}}
+            要求：自然、符合人设、不超过100字
+        timeout: 10s
+        retry: 2
+      - name: "生成配图"
+        type: "ai_generation"
+        model: "stable-diffusion-xl"
+        params:
+          prompt_template: "{{moment.content}}, lifestyle photo, casual, natural lighting"
+          width: 512
+          height: 512
+        timeout: 20s
+        retry: 2
+        optional: true
+      - name: "发布动态"
+        type: "api_call"
+        params:
+          endpoint: "/api/v1/moments"
+          method: "POST"
+          data:
+            character_id: "{{character.id}}"
+            content: "{{moment.content}}"
+            images: ["{{image.url}}"]
+            visibility: "public"
+
+  # 媒体生成降级工作流
+  media_generation_fallback:
+    name: "媒体生成降级"
+    description: "当主要模型不可用时的降级处理"
+    version: "1.0"
+    enabled: true
+    trigger:
+      event: "model.unavailable"
+    steps:
+      - name: "检查降级链"
+        type: "logic"
+        params:
+          condition: "{{model.fallback_chain}} is not empty"
+      - name: "切换到备用模型"
+        type: "model_switch"
+        params:
+          from_model: "{{original.model}}"
+          to_model: "{{model.fallback_chain[0]}}"
+          preserve_params: true
+      - name: "重试生成"
+        type: "retry"
+        params:
+          max_attempts: 2
+          delay: "5s"
+      - name: "通知用户"
+        type: "notification"
+        params:
+          type: "info"
+          message: "由于服务繁忙，已为您切换到备用模型"
+        condition: "{{retry.success}} == true"
+
+  # 用户余额不足处理工作流
+  insufficient_balance_handler:
+    name: "余额不足处理"
+    description: "当用户余额不足时的处理流程"
+    version: "1.0"
+    enabled: true
+    trigger:
+      event: "payment.insufficient_balance"
+    steps:
+      - name: "检查可用优惠"
+        type: "database"
+        params:
+          query: |
+            SELECT * FROM user_coupons 
+            WHERE user_id = '{{user.id}}' 
+            AND is_used = false 
+            AND expires_at > NOW()
+      - name: "推荐充值套餐"
+        type: "recommendation"
+        params:
+          based_on: "{{user.usage_history}}"
+          min_amount: "{{required.amount}}"
+      - name: "发送充值提醒"
+        type: "notification"
+        params:
+          type: "balance_low"
+          channels: ["in_app", "push"]
+          data:
+            required_amount: "{{required.amount}}"
+            recommended_packages: "{{recommendation.packages}}"
+            available_coupons: "{{coupons.list}}"
+
+# 全局配置
+global_config:
+  # 超时设置
+  default_timeout: "30s"
+  max_timeout: "300s"
+  
+  # 重试设置
+  default_retry_count: 3
+  retry_delay: "2s"
+  max_retry_delay: "30s"
+  
+  # 并发设置
+  max_concurrent_workflows: 100
+  max_concurrent_steps: 10
+  
+  # 存储设置
+  temp_storage_ttl: "1h"
+  result_storage_ttl: "24h"
+  
+  # 监控设置
+  enable_metrics: true
+  enable_tracing: true
+  log_level: "info"
+
+# 错误处理
+error_handling:
+  # 默认错误处理策略
+  default_strategy: "retry_then_fail"
+  
+  # 特定错误的处理策略
+  strategies:
+    "model.rate_limit":
+      action: "delay_retry"
+      delay: "60s"
+      max_attempts: 5
+    
+    "storage.quota_exceeded":
+      action: "cleanup_then_retry"
+      cleanup_policy: "oldest_first"
+      max_attempts: 2
+    
+    "network.timeout":
+      action: "exponential_backoff"
+      initial_delay: "1s"
+      max_delay: "60s"
+      max_attempts: 3
+
+# 通知配置
+notifications:
+  channels:
+    in_app:
+      enabled: true
+      priority: "high"
+    
+    push:
+      enabled: true
+      provider: "fcm"
+      priority: "normal"
+    
+    email:
+      enabled: false
+      provider: "smtp"
+      priority: "low"
+    
+    webhook:
+      enabled: true
+      endpoints:
+        - url: "https://api.yunai.com/webhooks/workflow"
+          events: ["workflow.completed", "workflow.failed"]

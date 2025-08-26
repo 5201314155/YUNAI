@@ -1,0 +1,51 @@
+# DeepSeek API配置
+deepseek:
+  # API密钥
+  api_key: "sk-qpkyeqeuvjbsflnxuiejsfumjtmfuvexmvvutooppdmxnwgi"
+
+  # API基础URL
+  base_url: "https://api.siliconflow.cn/v1"
+
+  # 默认模型
+  model: "deepseek-ai/DeepSeek-V3"
+  
+  # 请求配置
+  timeout: 30s
+  max_retries: 3
+  
+  # 生成参数
+  generation:
+    temperature: 0.8
+    max_tokens: 1000
+    top_p: 0.9
+    
+  # 限流配置
+  rate_limit:
+    requests_per_minute: 60
+    tokens_per_minute: 50000
+
+# 朋友圈生成配置
+moments:
+  # 默认生成数量
+  default_count: 3
+  
+  # 最大生成数量
+  max_count: 10
+  
+  # 内容长度限制
+  min_length: 10
+  max_length: 200
+  
+  # 相似度阈值
+  similarity_threshold: 0.7
+  
+  # 备用内容（当API调用失败时使用）
+  fallback_contents:
+    - "今天阳光明媚，心情也跟着好起来了 ☀️"
+    - "刚刚看了一部很棒的电影，推荐给大家！"
+    - "最近在学习新技能，感觉很充实"
+    - "想念家乡的味道，什么时候能回去看看"
+    - "和朋友们聊天总是很开心，友谊万岁！"
+    - "今天的咖啡特别香，配上这本书，完美的下午 ☕📖"
+    - "突然想起小时候的那些美好时光"
+    - "努力工作，也要记得享受生活 💪"

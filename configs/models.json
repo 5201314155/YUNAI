@@ -1,0 +1,280 @@
+{
+  "models": [
+    {
+      "id": "deepseek-ai/DeepSeek-V3",
+      "internal_key": "deepseek_v3_test",
+      "display_name": "deepseek测试专用",
+      "provider": "deepseek",
+      "capabilities": ["chat", "function_calling", "moments_generation"],
+      "params_schema": {
+        "type": "object",
+        "properties": {
+          "temperature": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 2,
+            "default": 0.7,
+            "description": "控制回复的随机性"
+          },
+          "max_tokens": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096,
+            "default": 2048,
+            "description": "最大生成长度"
+          },
+          "top_p": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 1,
+            "description": "核采样参数"
+          }
+        }
+      },
+      "model_system_prompt": "你是YUNAI平台的AI助手，请友好、专业地回答用户问题。",
+      "pricing": {
+        "input_tokens": 0.01,
+        "output_tokens": 0.03,
+        "currency": "金币",
+        "unit": "1k tokens"
+      },
+      "visibility": "public",
+      "permissions": {
+        "min_user_type": "basic",
+        "min_balance": 10,
+        "daily_limit": 1000,
+        "user_limit": 100
+      },
+      "health": {
+        "status": "healthy",
+        "last_check": "2025-08-26T10:00:00Z",
+        "response_time": 1200
+      },
+      "weight": 100,
+      "fallback_chain": ["gpt-3.5-turbo", "claude-3-haiku"],
+      "connectivity_test_endpoint": "https://api.openai.com/v1/models"
+    },
+    {
+      "id": "stable-diffusion-xl",
+      "internal_key": "sd_xl_base",
+      "display_name": "Stable Diffusion XL",
+      "provider": "stability",
+      "capabilities": ["txt2img", "img2img"],
+      "params_schema": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "type": "integer",
+            "enum": [512, 768, 1024],
+            "default": 1024,
+            "description": "图片宽度"
+          },
+          "height": {
+            "type": "integer",
+            "enum": [512, 768, 1024],
+            "default": 1024,
+            "description": "图片高度"
+          },
+          "steps": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 50,
+            "default": 20,
+            "description": "采样步数"
+          },
+          "cfg_scale": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 7,
+            "description": "提示词引导强度"
+          },
+          "seed": {
+            "type": "integer",
+            "minimum": -1,
+            "maximum": 2147483647,
+            "default": -1,
+            "description": "随机种子，-1为随机"
+          }
+        }
+      },
+      "model_system_prompt": "",
+      "pricing": {
+        "per_image": 5,
+        "currency": "金币",
+        "unit": "张"
+      },
+      "visibility": "public",
+      "permissions": {
+        "min_user_type": "basic",
+        "min_balance": 5,
+        "daily_limit": 100,
+        "user_limit": 20
+      },
+      "health": {
+        "status": "healthy",
+        "last_check": "2025-08-26T10:00:00Z",
+        "response_time": 8500
+      },
+      "weight": 90,
+      "fallback_chain": ["stable-diffusion-v1-5"],
+      "connectivity_test_endpoint": "https://api.stability.ai/v1/engines/list"
+    },
+    {
+      "id": "runway-gen3",
+      "internal_key": "runway_gen3_turbo",
+      "display_name": "Runway Gen-3 Turbo",
+      "provider": "runway",
+      "capabilities": ["txt2video", "img2video"],
+      "params_schema": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "integer",
+            "enum": [5, 10],
+            "default": 5,
+            "description": "视频时长（秒）"
+          },
+          "resolution": {
+            "type": "string",
+            "enum": ["720p", "1080p"],
+            "default": "720p",
+            "description": "视频分辨率"
+          },
+          "fps": {
+            "type": "integer",
+            "enum": [24, 30],
+            "default": 24,
+            "description": "帧率"
+          }
+        }
+      },
+      "model_system_prompt": "",
+      "pricing": {
+        "per_second": 10,
+        "currency": "金币",
+        "unit": "秒"
+      },
+      "visibility": "vip_only",
+      "permissions": {
+        "min_user_type": "vip",
+        "min_balance": 50,
+        "daily_limit": 20,
+        "user_limit": 5
+      },
+      "health": {
+        "status": "healthy",
+        "last_check": "2025-08-26T10:00:00Z",
+        "response_time": 25000
+      },
+      "weight": 80,
+      "fallback_chain": ["stable-video-diffusion"],
+      "connectivity_test_endpoint": "https://api.runwayml.com/v1/models"
+    },
+    {
+      "id": "elevenlabs-tts",
+      "internal_key": "elevenlabs_multilingual",
+      "display_name": "ElevenLabs TTS",
+      "provider": "elevenlabs",
+      "capabilities": ["tts"],
+      "params_schema": {
+        "type": "object",
+        "properties": {
+          "voice_id": {
+            "type": "string",
+            "enum": ["rachel", "domi", "bella", "antoni", "elli", "josh", "arnold", "adam", "sam"],
+            "default": "rachel",
+            "description": "音色选择"
+          },
+          "stability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+            "description": "音色稳定性"
+          },
+          "similarity_boost": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+            "description": "相似度增强"
+          }
+        }
+      },
+      "model_system_prompt": "",
+      "pricing": {
+        "per_character": 0.1,
+        "currency": "金币",
+        "unit": "字符"
+      },
+      "visibility": "public",
+      "permissions": {
+        "min_user_type": "basic",
+        "min_balance": 1,
+        "daily_limit": 10000,
+        "user_limit": 1000
+      },
+      "health": {
+        "status": "healthy",
+        "last_check": "2025-08-26T10:00:00Z",
+        "response_time": 3000
+      },
+      "weight": 95,
+      "fallback_chain": ["azure-tts"],
+      "connectivity_test_endpoint": "https://api.elevenlabs.io/v1/voices"
+    }
+  ],
+  "providers": [
+    {
+      "name": "deepseek",
+      "display_name": "DeepSeek",
+      "api_base": "https://api.siliconflow.cn/v1",
+      "auth_type": "bearer",
+      "api_key": "sk-qpkyeqeuvjbsflnxuiejsfumjtmfuvexmvvutooppdmxnwgi",
+      "rate_limit": {
+        "requests_per_minute": 1000,
+        "tokens_per_minute": 50000
+      }
+    },
+    {
+      "name": "openai",
+      "display_name": "OpenAI",
+      "api_base": "https://api.openai.com/v1",
+      "auth_type": "bearer",
+      "rate_limit": {
+        "requests_per_minute": 3500,
+        "tokens_per_minute": 90000
+      }
+    },
+    {
+      "name": "stability",
+      "display_name": "Stability AI",
+      "api_base": "https://api.stability.ai/v1",
+      "auth_type": "bearer",
+      "rate_limit": {
+        "requests_per_minute": 150
+      }
+    },
+    {
+      "name": "runway",
+      "display_name": "Runway ML",
+      "api_base": "https://api.runwayml.com/v1",
+      "auth_type": "bearer",
+      "rate_limit": {
+        "requests_per_minute": 60
+      }
+    },
+    {
+      "name": "elevenlabs",
+      "display_name": "ElevenLabs",
+      "api_base": "https://api.elevenlabs.io/v1",
+      "auth_type": "api_key",
+      "rate_limit": {
+        "requests_per_minute": 120,
+        "characters_per_minute": 20000
+      }
+    }
+  ]
+}

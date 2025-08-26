@@ -1,0 +1,182 @@
+{
+  "feature_flags": {
+    "enable_txt2img": {
+      "enabled": true,
+      "description": "文生图功能开关",
+      "min_user_type": "basic",
+      "rollout_percentage": 100,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_img2img": {
+      "enabled": true,
+      "description": "图生图功能开关",
+      "min_user_type": "vip",
+      "rollout_percentage": 100,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_img2video": {
+      "enabled": true,
+      "description": "图生视频功能开关",
+      "min_user_type": "vip",
+      "rollout_percentage": 80,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_txt2video": {
+      "enabled": true,
+      "description": "文生视频功能开关",
+      "min_user_type": "creator",
+      "rollout_percentage": 50,
+      "environments": ["dev", "stg"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_remove_bg": {
+      "enabled": true,
+      "description": "背景移除功能开关",
+      "min_user_type": "basic",
+      "rollout_percentage": 100,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_talking_head": {
+      "enabled": false,
+      "description": "虚拟人功能开关",
+      "min_user_type": "creator",
+      "rollout_percentage": 10,
+      "environments": ["dev"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_unified_group_model": {
+      "enabled": true,
+      "description": "群聊统一模型开关",
+      "min_user_type": "basic",
+      "rollout_percentage": 100,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_character_auto_image": {
+      "enabled": true,
+      "description": "角色自动生图开关",
+      "min_user_type": "vip",
+      "rollout_percentage": 90,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_scene_sfx": {
+      "enabled": true,
+      "description": "场景音效开关",
+      "min_user_type": "basic",
+      "rollout_percentage": 100,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_ai_proactive_call": {
+      "enabled": true,
+      "description": "AI主动来电开关",
+      "min_user_type": "basic",
+      "rollout_percentage": 70,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_moments_auto": {
+      "enabled": true,
+      "description": "朋友圈自动发布开关",
+      "min_user_type": "basic",
+      "rollout_percentage": 100,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_invite_cards": {
+      "enabled": true,
+      "description": "邀请卡功能开关",
+      "min_user_type": "basic",
+      "rollout_percentage": 100,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_advanced_tts": {
+      "enabled": true,
+      "description": "高级TTS音色开关",
+      "min_user_type": "vip",
+      "rollout_percentage": 100,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_hd_upscaler": {
+      "enabled": true,
+      "description": "高清放大功能开关",
+      "min_user_type": "creator",
+      "rollout_percentage": 60,
+      "environments": ["dev", "stg", "prod"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    },
+    "enable_batch_generation": {
+      "enabled": false,
+      "description": "批量生成功能开关",
+      "min_user_type": "creator",
+      "rollout_percentage": 20,
+      "environments": ["dev"],
+      "created_at": "2025-08-26T10:00:00Z",
+      "updated_at": "2025-08-26T10:00:00Z"
+    }
+  },
+  "user_type_hierarchy": {
+    "basic": 0,
+    "vip": 1,
+    "creator": 2,
+    "admin": 3
+  },
+  "card_system": {
+    "card_format": "16位纯数字",
+    "prefix_range": "668899",
+    "example": "6688990012345678",
+    "description": "YUNAI卡密采用16位纯数字格式，前6位为固定前缀668899"
+  },
+  "rollout_rules": {
+    "user_id_based": {
+      "enabled": true,
+      "description": "基于用户ID的灰度发布"
+    },
+    "region_based": {
+      "enabled": false,
+      "description": "基于地区的灰度发布"
+    },
+    "device_based": {
+      "enabled": false,
+      "description": "基于设备类型的灰度发布"
+    }
+  },
+  "emergency_switches": {
+    "disable_all_ai_generation": {
+      "enabled": false,
+      "description": "紧急关闭所有AI生成功能",
+      "priority": 1000
+    },
+    "disable_all_payments": {
+      "enabled": false,
+      "description": "紧急关闭所有支付功能",
+      "priority": 999
+    },
+    "enable_maintenance_mode": {
+      "enabled": false,
+      "description": "开启维护模式",
+      "priority": 998
+    }
+  }
+}
