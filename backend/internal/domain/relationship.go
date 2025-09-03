@@ -624,3 +624,28 @@ type RelationshipInvitationSuggestion struct {
 	Priority         int                            `json:"priority"`
 	CreatedAt        time.Time                      `json:"created_at"`
 }
+
+// 类型别名，用于向后兼容
+type Relationship = CharacterRelationshipEnhanced
+
+// DialogueLine 对话行
+type DialogueLine struct {
+	ID          uuid.UUID `json:"id"`
+	CharacterID uuid.UUID `json:"character_id"`
+	Content     string    `json:"content"`
+	Emotion     *string   `json:"emotion,omitempty"`
+	Tone        *string   `json:"tone,omitempty"`
+	Timestamp   time.Time `json:"timestamp"`
+}
+
+// RelationshipAnalysis 关系分析结果
+type RelationshipAnalysis struct {
+	ID                uuid.UUID                        `json:"id"`
+	AnalyzedAt        time.Time                        `json:"analyzed_at"`
+	Relationships     []*CharacterRelationshipEnhanced `json:"relationships"`
+	Dynamics          []*RelationshipDynamic           `json:"dynamics"`
+	Conflicts         []*RelationshipConflict          `json:"conflicts"`
+	Suggestions       []string                         `json:"suggestions"`
+	OverallStability  float64                          `json:"overall_stability"`
+	NetworkComplexity float64                          `json:"network_complexity"`
+}

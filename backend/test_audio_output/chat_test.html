@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 YUNAI聊天测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .chat-container {
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.ai {
+            justify-content: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+        }
+        
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.ai .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin: 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .message.user .message-avatar {
+            background: #667eea;
+            color: white;
+        }
+        
+        .message.ai .message-avatar {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            gap: 8px;
+        }
+        
+        .voice-btn {
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .voice-btn:hover {
+            background: #5a4a7a;
+        }
+        
+        .voice-btn.playing {
+            background: #28a745;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-field:focus {
+            border-color: #667eea;
+        }
+        
+        .send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .send-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+        
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px 0;
+            color: #666;
+            font-style: italic;
+            font-size: 12px;
+        }
+        
+        .quick-messages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .quick-msg {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-msg:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .status-bar {
+            padding: 8px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .status-bar.generating {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-bar.playing {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            🎯 YUNAI聊天测试
+            <div style="font-size: 0.8em; margin-top: 5px; opacity: 0.9;">
+                与AI小雨对话 • 自动语音播放
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+                <div class="message-avatar">🤖</div>
+                <div>
+                    <div class="message-bubble">
+                        你好！我是YUNAI的AI助手小雨，很高兴见到你！有什么我可以帮助你的吗？
+                    </div>
+                    <div class="voice-controls">
+                        <button class="voice-btn" onclick="playWelcomeVoice()">🔊 播放</button>
+                        <span style="font-size: 11px; color: #666;">欢迎语音</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            🤖 小雨正在思考中...
+        </div>
+        
+        <div class="status-bar" id="statusBar">
+            准备就绪 • 发送消息开始聊天
+        </div>
+        
+        <div class="chat-input">
+            <div class="quick-messages">
+                <div class="quick-msg" onclick="sendQuickMessage('你好，小雨！')">👋 你好</div>
+                <div class="quick-msg" onclick="sendQuickMessage('我今天心情不太好')">😔 心情不好</div>
+                <div class="quick-msg" onclick="sendQuickMessage('谢谢你的帮助')">🙏 感谢</div>
+                <div class="quick-msg" onclick="sendQuickMessage('我们聊点轻松的话题吧')">😊 轻松聊天</div>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" class="input-field" id="messageInput" 
+                       placeholder="输入消息..." 
+                       onkeypress="handleKeyPress(event)">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let messageCount = 0;
+        let isGenerating = false;
+        
+        // 模拟AI回复数据
+        const aiReplies = {
+            "你好": "你好！我是小雨，很高兴见到你！今天过得怎么样呀？",
+            "你好，小雨！": "你好！我是小雨，很高兴见到你！今天过得怎么样呀？",
+            "心情不好": "我理解你现在的感受，每个人都会有心情低落的时候。你愿意和我聊聊发生了什么吗？我会认真倾听的。",
+            "我今天心情不太好": "我理解你现在的感受，每个人都会有心情低落的时候。你愿意和我聊聊发生了什么吗？我会认真倾听的。",
+            "谢谢": "不用客气！能够帮助到你我也很开心。如果还有其他需要帮助的地方，随时告诉我哦！",
+            "谢谢你的帮助": "不用客气！能够帮助到你我也很开心。如果还有其他需要帮助的地方，随时告诉我哦！",
+            "轻松聊天": "太好了！我喜欢和你聊轻松的话题。你有什么兴趣爱好吗？或者想聊聊今天有趣的事情？",
+            "我们聊点轻松的话题吧": "太好了！我喜欢和你聊轻松的话题。你有什么兴趣爱好吗？或者想聊聊今天有趣的事情？",
+            "再见": "再见！希望我们的聊天让你感到愉快。期待下次再见面！",
+            "default": "我听到你说的了，你的想法很有趣！你还想聊什么呢？"
+        };
+        
+        // 语音文件映射 - 动态生成
+        let voiceFiles = {
+            "welcome": "greeting.mp3"
+        };
+
+        // 动态语音文件计数器
+        let voiceFileCounter = 1;
+        
+        // 处理键盘事件
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        // 发送快速消息
+        function sendQuickMessage(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            if (isGenerating) return;
+            
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // 显示用户消息
+            addUserMessage(message);
+            
+            // 清空输入框
+            input.value = '';
+            
+            // 显示正在生成状态
+            showGenerating();
+            
+            // 模拟AI回复延迟
+            setTimeout(() => {
+                generateAIReply(message);
+            }, 1000 + Math.random() * 1000); // 1-2秒随机延迟
+        }
+        
+        // 添加用户消息
+        function addUserMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            messageDiv.innerHTML = `
+                <div>
+                    <div class="message-bubble">${message}</div>
+                    <div style="font-size: 11px; color: #666; text-align: right; margin-top: 4px;">
+                        用户消息 • 不生成语音
+                    </div>
+                </div>
+                <div class="message-avatar">👤</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        // 生成AI回复
+        function generateAIReply(userMessage) {
+            // 获取AI回复文本
+            let aiReply = aiReplies[userMessage] || aiReplies["default"];
+
+            // 为这个回复生成语音文件
+            generateVoiceForReply(aiReply, userMessage);
+
+            // 添加AI消息
+            addAIMessage(aiReply);
+
+            // 自动播放语音
+            setTimeout(() => {
+                playAIVoice(aiReply);
+            }, 1000); // 给语音生成更多时间
+
+            hideGenerating();
+        }
+        
+        // 添加AI消息
+        function addAIMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            messageCount++;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div>
+                    <div class="message-bubble">${message}</div>
+                    <div class="voice-controls">
+                        <button class="voice-btn" onclick="playAIVoice('${message.replace(/'/g, "\\'")}')">🔊 播放</button>
+                        <button class="voice-btn" onclick="stopAudio()">⏹️ 停止</button>
+                        <span style="font-size: 11px; color: #666;">AI语音回复</span>
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        // 播放欢迎语音
+        function playWelcomeVoice() {
+            playVoiceFile("greeting.mp3", "播放欢迎语音");
+        }
+        
+        // 播放AI语音
+        function playAIVoice(message) {
+            // 查找对应的语音文件
+            let voiceFile = voiceFiles[message];
+
+            if (!voiceFile) {
+                // 如果没有对应语音，显示提示
+                updateStatus(`⚠️ 语音文件未找到: ${message.substring(0, 20)}...`, '');
+                console.log('可用语音文件:', Object.keys(voiceFiles));
+                console.log('请求的消息:', message);
+
+                // 使用默认语音
+                voiceFile = "comfort.mp3";
+                updateStatus(`🔊 使用默认语音播放`, 'playing');
+            }
+
+            playVoiceFile(voiceFile, `播放AI回复语音`);
+        }
+        
+        // 播放语音文件
+        function playVoiceFile(filename, description) {
+            updateStatus(`🔊 ${description}`, 'playing');
+            
+            // 停止当前播放的音频
+            stopAudio();
+            
+            // 创建新的音频元素
+            const audio = new Audio(filename);
+            window.currentAudio = audio;
+            
+            // 更新播放按钮状态
+            updatePlayButtons(true);
+            
+            audio.onloadstart = function() {
+                console.log(`开始加载音频: ${filename}`);
+            };
+            
+            audio.oncanplay = function() {
+                console.log(`音频可以播放: ${filename}`);
+            };
+            
+            audio.onplay = function() {
+                console.log(`开始播放音频: ${filename}`);
+            };
+            
+            audio.onended = function() {
+                console.log(`音频播放完成: ${filename}`);
+                updateStatus('准备就绪 • 发送消息继续聊天', '');
+                updatePlayButtons(false);
+            };
+            
+            audio.onerror = function(e) {
+                console.error(`音频播放失败: ${filename}`, e);
+                updateStatus(`❌ 语音播放失败: ${filename}`, '');
+                updatePlayButtons(false);
+                
+                // 提示用户手动播放
+                alert(`语音文件 ${filename} 播放失败。\n请检查文件是否存在，或手动播放 test_audio_output 目录中的音频文件。`);
+            };
+            
+            // 尝试播放
+            audio.play().catch(function(error) {
+                console.error('播放失败:', error);
+                updateStatus('❌ 语音播放失败 • 请检查音频文件', '');
+                updatePlayButtons(false);
+                
+                // 提示用户交互后再播放
+                if (error.name === 'NotAllowedError') {
+                    alert('浏览器需要用户交互才能播放音频。请点击页面任意位置后再试。');
+                }
+            });
+        }
+        
+        // 停止音频播放
+        function stopAudio() {
+            if (window.currentAudio) {
+                window.currentAudio.pause();
+                window.currentAudio.currentTime = 0;
+                window.currentAudio = null;
+            }
+            updatePlayButtons(false);
+            updateStatus('准备就绪 • 发送消息继续聊天', '');
+        }
+        
+        // 更新播放按钮状态
+        function updatePlayButtons(isPlaying) {
+            const buttons = document.querySelectorAll('.voice-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes('播放')) {
+                    btn.classList.toggle('playing', isPlaying);
+                    btn.textContent = isPlaying ? '🔊 播放中...' : '🔊 播放';
+                }
+            });
+        }
+        
+        // 显示生成中状态
+        function showGenerating() {
+            isGenerating = true;
+            document.getElementById('typingIndicator').style.display = 'block';
+            document.getElementById('sendBtn').disabled = true;
+            updateStatus('🤖 AI正在生成回复...', 'generating');
+        }
+        
+        // 隐藏生成中状态
+        function hideGenerating() {
+            isGenerating = false;
+            document.getElementById('typingIndicator').style.display = 'none';
+            document.getElementById('sendBtn').disabled = false;
+            updateStatus('准备就绪 • 发送消息继续聊天', '');
+        }
+        
+        // 更新状态栏
+        function updateStatus(message, className) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = message;
+            statusBar.className = `status-bar ${className}`;
+        }
+        
+        // 滚动到底部
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // 页面加载完成后的初始化
+        window.onload = function() {
+            console.log('YUNAI聊天测试页面加载完成');
+            console.log('可用的语音文件:', Object.keys(voiceFiles));
+            
+            // 聚焦输入框
+            document.getElementById('messageInput').focus();
+            
+            // 提示用户
+            setTimeout(() => {
+                updateStatus('💡 点击快速消息或输入文字开始聊天', '');
+            }, 1000);
+        };
+        
+        // 添加键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            // Ctrl+Enter 发送消息
+            if (event.ctrlKey && event.key === 'Enter') {
+                sendMessage();
+            }
+            
+            // Esc 停止音频
+            if (event.key === 'Escape') {
+                stopAudio();
+            }
+        });
+    </script>
+</body>
+</html>

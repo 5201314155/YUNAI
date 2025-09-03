@@ -275,17 +275,17 @@ type UserPaymentInfo struct {
 
 // RechargePackage 充值套餐
 type RechargePackage struct {
-	ID           uuid.UUID `json:"id" db:"id"`
-	Name         string    `json:"name" db:"name"`
-	Amount       float64   `json:"amount" db:"amount"`               // 人民币金额
-	CoinsAmount  int64     `json:"coins_amount" db:"coins_amount"`   // 金币数量
-	BonusCoins   int64     `json:"bonus_coins" db:"bonus_coins"`     // 赠送金币
-	DiscountRate float64   `json:"discount_rate" db:"discount_rate"` // 折扣率
-	IsPopular    bool      `json:"is_popular" db:"is_popular"`       // 是否热门
-	IsActive     bool      `json:"is_active" db:"is_active"`         // 是否激活
-	SortOrder    int       `json:"sort_order" db:"sort_order"`       // 排序
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+	ID          uuid.UUID `json:"id" db:"id"`
+	Name        string    `json:"name" db:"name"`
+	Description *string   `json:"description" db:"description"`   // 套餐描述
+	Amount      float64   `json:"amount" db:"amount"`             // 人民币金额
+	BonusAmount float64   `json:"bonus_amount" db:"bonus_amount"` // 赠送金额
+	Coins       int       `json:"coins" db:"coins"`               // 金币数量
+	BonusCoins  int       `json:"bonus_coins" db:"bonus_coins"`   // 赠送金币
+	IsActive    bool      `json:"is_active" db:"is_active"`       // 是否激活
+	SortOrder   int       `json:"sort_order" db:"sort_order"`     // 排序
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // AdminRechargeRecord 管理员代充记录

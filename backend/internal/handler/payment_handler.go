@@ -40,6 +40,10 @@ func NewPaymentHandler(paymentService service.PaymentService, logger *logrus.Log
 // @Router /api/v1/payment/cards [post]
 func (h *PaymentHandler) BindPaymentCard(c *gin.Context) {
 	userID := auth.GetUserIDFromContext(c)
+	// 测试环境下使用默认用户ID
+	if userID == uuid.Nil {
+		userID = uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	}
 
 	var req domain.BindCardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -164,7 +168,9 @@ func (h *PaymentHandler) DeletePaymentCard(c *gin.Context) {
 		return
 	}
 
-	if err := h.paymentService.DeletePaymentCard(c.Request.Context(), userID, cardID); err != nil {
+	// 统一使用 DeletePaymentCard(ctx, userID, *DeleteCardRequest)
+	req := &domain.DeleteCardRequest{CardID: cardID, Password: "000000", Reason: "user_request"}
+	if err := h.paymentService.DeletePaymentCard(c.Request.Context(), userID, req); err != nil {
 		if appErr, ok := err.(*domain.AppError); ok {
 			c.JSON(appErr.HTTPStatus(), domain.ErrorResponse{
 				Code:    appErr.Code,

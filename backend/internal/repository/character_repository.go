@@ -18,6 +18,7 @@ type CharacterRepository interface {
 	// 角色管理
 	CreateCharacter(ctx context.Context, character *domain.Character) error
 	GetCharacterByID(ctx context.Context, id uuid.UUID) (*domain.Character, error)
+	GetByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.Character, error)
 	UpdateCharacter(ctx context.Context, character *domain.Character) error
 	DeleteCharacter(ctx context.Context, id uuid.UUID) error
 	ListCharacters(ctx context.Context, req *domain.CharacterListRequest) ([]*domain.Character, int, error)
@@ -62,13 +63,13 @@ func NewCharacterRepository(db *sqlx.DB) CharacterRepository {
 func (r *characterRepository) CreateCharacter(ctx context.Context, character *domain.Character) error {
 	query := `
 		INSERT INTO characters (
-			id, user_id, name, description, personality,
+			id, created_by, name, description, personality,
 			bg_image_url, cutout_image_url, bg_image_width, bg_image_height,
 			cutout_image_width, cutout_image_height, default_model_id, model_params,
 			system_prompt, visibility, is_featured, allow_chat, allow_group_chat,
 			allow_calls, chat_count, like_count, view_count
 		) VALUES (
-			:id, :user_id, :name, :description, :personality,
+			:id, :created_by, :name, :description, :personality,
 			:bg_image_url, :cutout_image_url, :bg_image_width, :bg_image_height,
 			:cutout_image_width, :cutout_image_height, :default_model_id, :model_params,
 			:system_prompt, :visibility, :is_featured, :allow_chat, :allow_group_chat,
@@ -82,7 +83,7 @@ func (r *characterRepository) CreateCharacter(ctx context.Context, character *do
 // GetCharacterByID 根据ID获取角色
 func (r *characterRepository) GetCharacterByID(ctx context.Context, id uuid.UUID) (*domain.Character, error) {
 	query := `
-		SELECT id, user_id, name, description, personality,
+		SELECT id, created_by, name, description, personality,
 			   bg_image_url, cutout_image_url, bg_image_width, bg_image_height,
 			   cutout_image_width, cutout_image_height, default_model_id, model_params,
 			   system_prompt, visibility, is_featured, allow_chat, allow_group_chat,
@@ -99,6 +100,26 @@ func (r *characterRepository) GetCharacterByID(ctx context.Context, id uuid.UUID
 	}
 
 	return &character, nil
+}
+
+// GetByUserID 根据用户ID获取角色列表
+func (r *characterRepository) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.Character, error) {
+	query := `
+		SELECT id, created_by, name, description, personality, bg_image_url, cutout_image_url,
+			   bg_image_width, bg_image_height, cutout_image_width, cutout_image_height,
+			   default_model_id, model_params, system_prompt, visibility, is_featured,
+			   allow_chat, allow_group_chat, allow_calls, created_at, updated_at
+		FROM characters
+		WHERE created_by = $1
+		ORDER BY created_at DESC`
+
+	var characters []*domain.Character
+	err := r.db.SelectContext(ctx, &characters, query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get characters by user ID: %w", err)
+	}
+
+	return characters, nil
 }
 
 // UpdateCharacter 更新角色
@@ -135,7 +156,7 @@ func (r *characterRepository) ListCharacters(ctx context.Context, req *domain.Ch
 	argIndex := 1
 
 	if req.UserID != nil {
-		conditions = append(conditions, fmt.Sprintf("user_id = $%d", argIndex))
+		conditions = append(conditions, fmt.Sprintf("created_by = $%d", argIndex))
 		args = append(args, *req.UserID)
 		argIndex++
 	}
@@ -185,7 +206,7 @@ func (r *characterRepository) ListCharacters(ctx context.Context, req *domain.Ch
 	// 获取数据
 	offset := (req.Page - 1) * req.Limit
 	dataQuery := fmt.Sprintf(`
-		SELECT id, user_id, name, description, personality,
+		SELECT id, created_by, name, description, personality,
 			   bg_image_url, cutout_image_url, bg_image_width, bg_image_height,
 			   cutout_image_width, cutout_image_height, default_model_id, model_params,
 			   system_prompt, visibility, is_featured, allow_chat, allow_group_chat,

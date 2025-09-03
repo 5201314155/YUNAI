@@ -50,6 +50,58 @@ type AIModel struct {
 	LastHealthCheck *time.Time `json:"last_health_check" db:"last_health_check"`
 }
 
+// ModelUsageRecord 模型使用记录
+type ModelUsageRecord struct {
+	ID           uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	ModelID      uuid.UUID `json:"model_id" gorm:"type:uuid;not null"`
+	UserID       uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+	FunctionType string    `json:"function_type" gorm:"not null"` // chat, txt2img, img2video, tts
+	InputTokens  int       `json:"input_tokens" gorm:"default:0"`
+	OutputTokens int       `json:"output_tokens" gorm:"default:0"`
+	Success      bool      `json:"success" gorm:"default:false"`
+	Cost         float64   `json:"cost" gorm:"default:0"`
+	Duration     int64     `json:"duration" gorm:"default:0"` // 毫秒
+	ErrorMessage string    `json:"error_message"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+// ModelOperationLog 模型操作日志
+type ModelOperationLog struct {
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	ModelID   uuid.UUID `json:"model_id" gorm:"type:uuid;not null"`
+	AdminID   uuid.UUID `json:"admin_id" gorm:"type:uuid;not null"`
+	Operation string    `json:"operation" gorm:"not null"` // enable, disable, update, delete
+	Reason    string    `json:"reason"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// ModelUserWhitelist 模型用户白名单
+type ModelUserWhitelist struct {
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	ModelID   uuid.UUID `json:"model_id" gorm:"type:uuid;not null"`
+	UserID    uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// ModelUserBlacklist 模型用户黑名单
+type ModelUserBlacklist struct {
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	ModelID   uuid.UUID `json:"model_id" gorm:"type:uuid;not null"`
+	UserID    uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+	Reason    string    `json:"reason"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// ModelHealthRecord 模型健康记录
+type ModelHealthRecord struct {
+	ID           uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	ModelID      uuid.UUID `json:"model_id" gorm:"type:uuid;not null"`
+	Status       string    `json:"status" gorm:"not null"`         // healthy, unhealthy, timeout, error
+	ResponseTime int64     `json:"response_time" gorm:"default:0"` // 响应时间(ms)
+	ErrorMessage string    `json:"error_message"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
 // ModelCapability 模型能力
 type ModelCapability struct {
 	ID         uuid.UUID `json:"id" db:"id"`

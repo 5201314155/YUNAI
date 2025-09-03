@@ -49,6 +49,9 @@ type MemoryService interface {
 
 	// 记忆统计
 	GetMemoryStats(ctx context.Context, characterID uuid.UUID) (map[string]interface{}, error)
+
+	// 通用存储（用于系统/身份/锚点等灵活写入）
+	StoreMemory(ctx context.Context, characterID uuid.UUID, data map[string]interface{}) error
 }
 
 type memoryService struct {
@@ -106,6 +109,30 @@ func (s *memoryService) CreateMemoryFragment(ctx context.Context, req *domain.Cr
 	}).Info("Memory fragment created")
 
 	return memory, nil
+}
+
+// StoreMemory 通用存储任意结构的系统记忆（以文本化内容保存）
+func (s *memoryService) StoreMemory(ctx context.Context, characterID uuid.UUID, data map[string]interface{}) error {
+	// 将数据序列化为文本
+	bs, _ := json.Marshal(data)
+	content := string(bs)
+	importance := 5.0
+
+	req := &domain.CreateMemoryFragmentRequest{
+		CharacterID:        characterID,
+		Content:            content,
+		MemoryType:         "system",
+		ImportanceScore:    importance,
+		EmotionalIntensity: 0.0,
+		RelatedCharacters:  nil,
+		RelatedTopics:      nil,
+		RelatedEmotions:    nil,
+		SourceMessageID:    nil,
+		SourceGroupChatID:  nil,
+		ExpiresAt:          nil,
+	}
+	_, err := s.CreateMemoryFragment(ctx, req)
+	return err
 }
 
 // GetMemoryFragment 获取记忆片段

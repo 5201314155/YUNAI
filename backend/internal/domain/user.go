@@ -51,8 +51,9 @@ type User struct {
 	LoginCount  int        `json:"login_count" db:"login_count"`
 
 	// 时间戳
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at" db:"updated_at"`
+	EmailVerifiedAt *time.Time `json:"email_verified_at,omitempty" db:"email_verified_at"`
 }
 
 // IdentityType 身份类型
@@ -123,6 +124,29 @@ func (u *User) HasPermission(requiredType UserType) bool {
 	}
 
 	return userLevel >= requiredLevel
+}
+
+// EmailVerification 邮箱验证模型
+type EmailVerification struct {
+	ID        uuid.UUID `json:"id" db:"id"`
+	UserID    uuid.UUID `json:"user_id" db:"user_id"`
+	Email     string    `json:"email" db:"email"`
+	Code      string    `json:"code" db:"code"`
+	Purpose   string    `json:"purpose" db:"purpose"` // email_verification, password_reset, bind_card
+	ExpiresAt time.Time `json:"expires_at" db:"expires_at"`
+	Used      bool      `json:"used" db:"used"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// IsExpired 检查验证码是否过期
+func (ev *EmailVerification) IsExpired() bool {
+	return time.Now().After(ev.ExpiresAt)
+}
+
+// IsValid 检查验证码是否有效
+func (ev *EmailVerification) IsValid() bool {
+	return !ev.Used && !ev.IsExpired()
 }
 
 // IsUserActive 检查用户是否处于活跃状态

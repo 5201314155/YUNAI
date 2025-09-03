@@ -61,6 +61,12 @@ var (
 	ErrInsufficientPermission = errors.New("insufficient permission for feature")
 )
 
+// 缓存相关错误
+var (
+	ErrCacheNotFound = errors.New("cache not found")
+	ErrCacheExpired  = errors.New("cache expired")
+)
+
 // 模型相关错误
 var (
 	ErrModelNotFound      = errors.New("model not found")
@@ -199,6 +205,41 @@ var (
 
 	AppErrUnauthorized = NewAppError(CodeUnauthorized, "未授权访问", ErrUnauthorized)
 	AppErrForbidden    = NewAppError(CodeForbidden, "权限不足", ErrForbidden)
+
+	// 邮箱验证相关错误
+	AppErrInvalidVerificationCode = NewAppError("INVALID_VERIFICATION_CODE", "无效的验证码", errors.New("invalid verification code"))
+	AppErrVerificationCodeExpired = NewAppError("VERIFICATION_CODE_EXPIRED", "验证码已过期", errors.New("verification code expired"))
+	AppErrVerificationCodeUsed    = NewAppError("VERIFICATION_CODE_USED", "验证码已使用", errors.New("verification code used"))
+	AppErrEmailAlreadyVerified    = NewAppError("EMAIL_ALREADY_VERIFIED", "邮箱已验证", errors.New("email already verified"))
+	AppErrInvalidResetToken       = NewAppError("INVALID_RESET_TOKEN", "无效的重置令牌", errors.New("invalid reset token"))
+	AppErrResetTokenExpired       = NewAppError("RESET_TOKEN_EXPIRED", "重置令牌已过期", errors.New("reset token expired"))
+
+	// 告警相关错误
+	ErrAlertRuleNotFound    = errors.New("alert rule not found")
+	ErrAlertNotFound        = errors.New("alert not found")
+	AppErrAlertRuleNotFound = NewAppError("ALERT_RULE_NOT_FOUND", "告警规则不存在", ErrAlertRuleNotFound)
+	AppErrAlertNotFound     = NewAppError("ALERT_NOT_FOUND", "告警记录不存在", ErrAlertNotFound)
+
+	// 角色审核相关错误
+	ErrCharacterReviewNotFound = errors.New("character review not found")
+	ErrReviewRuleNotFound      = errors.New("review rule not found")
+	ErrSensitiveWordNotFound   = errors.New("sensitive word not found")
+	ErrReviewConfigNotFound    = errors.New("review config not found")
+
+	// 通知推送系统错误
+	ErrNotificationNotFound            = errors.New("notification not found")
+	ErrNotificationTemplateNotFound    = errors.New("notification template not found")
+	ErrNotificationPreferencesNotFound = errors.New("notification preferences not found")
+	ErrNotificationQueueNotFound       = errors.New("notification queue item not found")
+	ErrWebSocketConnectionNotFound     = errors.New("websocket connection not found")
+	ErrNotificationExpired             = errors.New("notification has expired")
+	ErrNotificationAlreadyRead         = errors.New("notification already read")
+	ErrInvalidNotificationChannel      = errors.New("invalid notification channel")
+	ErrNotificationRateLimitExceeded   = errors.New("notification rate limit exceeded")
+	AppErrCharacterReviewNotFound      = NewAppError("CHARACTER_REVIEW_NOT_FOUND", "角色审核记录不存在", ErrCharacterReviewNotFound)
+	AppErrReviewRuleNotFound           = NewAppError("REVIEW_RULE_NOT_FOUND", "审核规则不存在", ErrReviewRuleNotFound)
+	AppErrSensitiveWordNotFound        = NewAppError("SENSITIVE_WORD_NOT_FOUND", "敏感词不存在", ErrSensitiveWordNotFound)
+	AppErrReviewConfigNotFound         = NewAppError("REVIEW_CONFIG_NOT_FOUND", "审核配置不存在", ErrReviewConfigNotFound)
 )
 
 // IsAppError 检查是否为应用错误

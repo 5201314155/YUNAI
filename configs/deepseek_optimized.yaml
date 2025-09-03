@@ -1,0 +1,253 @@
+# DeepSeek API优化配置 - 基于模型发现结果
+deepseek:
+  # API密钥
+  api_key: "sk-qpkyeqeuvjbsflnxuiejsfumjtmfuvexmvvutooppdmxnwgi"
+
+  # API基础URL
+  base_url: "https://api.siliconflow.cn/v1"
+
+  # 聊天模型配置
+  chat_models:
+    # 主要模型
+    primary:
+      model: "deepseek-ai/DeepSeek-V3"
+      display_name: "DeepSeek-V3"
+      description: "最新的DeepSeek模型，推理能力强"
+      max_tokens: 4000
+      temperature: 0.8
+      top_p: 0.9
+      
+    # 备用模型
+    fallback:
+      - model: "Qwen/Qwen2.5-72B-Instruct"
+        display_name: "Qwen2.5-72B"
+        description: "阿里云大模型，性能稳定"
+        max_tokens: 4000
+        temperature: 0.8
+        
+      - model: "deepseek-ai/DeepSeek-V2.5"
+        display_name: "DeepSeek-V2.5"
+        description: "DeepSeek上一代模型"
+        max_tokens: 4000
+        temperature: 0.8
+
+    # 专用模型
+    specialized:
+      # 代码生成
+      code:
+        model: "Qwen/Qwen2.5-Coder-32B-Instruct"
+        display_name: "Qwen2.5-Coder"
+        description: "专门用于代码生成"
+        max_tokens: 2000
+        temperature: 0.3
+        
+      # 长文本处理
+      long_context:
+        model: "Qwen/Qwen2.5-72B-Instruct-128K"
+        display_name: "Qwen2.5-128K"
+        description: "支持128K上下文长度"
+        max_tokens: 4000
+        temperature: 0.7
+
+  # 嵌入模型配置 - 重点优化
+  embedding_models:
+    # 主要嵌入模型
+    primary:
+      model: "BAAI/bge-large-zh-v1.5"
+      display_name: "BGE-Large-ZH"
+      description: "中文嵌入模型，1024维向量"
+      dimensions: 1024
+      max_input_tokens: 512
+      batch_size: 32
+      
+    # 备用嵌入模型
+    fallback:
+      - model: "BAAI/bge-m3"
+        display_name: "BGE-M3"
+        description: "多语言嵌入模型"
+        dimensions: 1024
+        max_input_tokens: 8192
+        batch_size: 16
+        
+      - model: "netease-youdao/bce-embedding-base_v1"
+        display_name: "BCE-Base"
+        description: "网易有道嵌入模型"
+        dimensions: 768
+        max_input_tokens: 512
+        batch_size: 32
+
+    # 专用嵌入模型
+    specialized:
+      # 高性能版本
+      pro:
+        model: "Pro/BAAI/bge-m3"
+        display_name: "BGE-M3-Pro"
+        description: "BGE-M3专业版，性能更好"
+        dimensions: 1024
+        max_input_tokens: 8192
+        batch_size: 8
+        
+      # 重排序模型
+      reranker:
+        model: "BAAI/bge-reranker-v2-m3"
+        display_name: "BGE-Reranker-V2"
+        description: "用于搜索结果重排序"
+        max_input_tokens: 8192
+        batch_size: 8
+
+  # 请求配置
+  timeout: 30s
+  max_retries: 3
+  retry_delay: 1s
+  
+  # 限流配置
+  rate_limit:
+    requests_per_minute: 60
+    tokens_per_minute: 50000
+    embedding_requests_per_minute: 100
+    
+  # 缓存配置
+  cache:
+    enabled: true
+    ttl: 3600s # 1小时
+    max_size: 10000
+    embedding_cache_ttl: 86400s # 24小时，嵌入向量缓存更久
+
+# 朋友圈生成优化配置
+moments:
+  # 生成配置
+  generation:
+    default_count: 3
+    max_count: 10
+    min_length: 10
+    max_length: 200
+    
+  # 相似度配置
+  similarity:
+    threshold: 0.7
+    embedding_model: "BAAI/bge-large-zh-v1.5"
+    cache_embeddings: true
+    
+  # 内容质量控制
+  quality:
+    min_creativity_score: 0.6
+    max_repetition_rate: 0.3
+    enable_content_filter: true
+    
+  # 个性化配置
+  personalization:
+    use_chat_history: true
+    history_window: 50 # 最近50条消息
+    relationship_weight: 0.3
+    personality_weight: 0.7
+
+# 智能功能配置
+smart_features:
+  # 内容相似度检测
+  similarity_detection:
+    enabled: true
+    embedding_model: "BAAI/bge-large-zh-v1.5"
+    similarity_threshold: 0.85
+    
+  # 智能@提及
+  smart_mention:
+    enabled: true
+    relationship_threshold: 0.6
+    context_analysis: true
+    
+  # 情感分析
+  sentiment_analysis:
+    enabled: true
+    model: "deepseek-ai/DeepSeek-V3"
+    cache_results: true
+    
+  # 内容推荐
+  content_recommendation:
+    enabled: true
+    embedding_model: "BAAI/bge-m3"
+    recommendation_count: 5
+
+# 性能优化配置
+performance:
+  # 并发控制
+  concurrency:
+    max_concurrent_requests: 10
+    max_concurrent_embeddings: 20
+    
+  # 批处理
+  batch_processing:
+    enabled: true
+    batch_size: 16
+    batch_timeout: 5s
+    
+  # 连接池
+  connection_pool:
+    max_idle_conns: 10
+    max_open_conns: 100
+    conn_max_lifetime: 300s
+
+# 监控和日志配置
+monitoring:
+  # 健康检查
+  health_check:
+    enabled: true
+    interval: 60s
+    timeout: 10s
+    
+  # 指标收集
+  metrics:
+    enabled: true
+    model_usage: true
+    response_time: true
+    error_rate: true
+    
+  # 日志配置
+  logging:
+    level: "info"
+    log_requests: true
+    log_responses: false # 避免记录敏感内容
+    log_embeddings: false
+
+# 故障转移配置
+failover:
+  # 自动故障转移
+  auto_failover: true
+  
+  # 健康检查失败阈值
+  failure_threshold: 3
+  
+  # 恢复检查间隔
+  recovery_interval: 300s
+  
+  # 模型优先级
+  model_priority:
+    chat:
+      - "deepseek-ai/DeepSeek-V3"
+      - "Qwen/Qwen2.5-72B-Instruct"
+      - "deepseek-ai/DeepSeek-V2.5"
+      
+    embedding:
+      - "BAAI/bge-large-zh-v1.5"
+      - "BAAI/bge-m3"
+      - "netease-youdao/bce-embedding-base_v1"
+
+# 成本优化配置
+cost_optimization:
+  # 智能模型选择
+  smart_model_selection: true
+  
+  # 基于任务复杂度选择模型
+  task_based_selection:
+    simple_tasks: "Qwen/Qwen2.5-7B-Instruct"
+    complex_tasks: "deepseek-ai/DeepSeek-V3"
+    code_tasks: "Qwen/Qwen2.5-Coder-32B-Instruct"
+    
+  # 嵌入向量复用
+  embedding_reuse:
+    enabled: true
+    similarity_threshold: 0.95
+    
+  # 预算控制
+  budget_control:
+    daily_limit: 1000.0 # 每日预算限制（元）
+    alert_threshold: 0.8 # 80%时发出警告

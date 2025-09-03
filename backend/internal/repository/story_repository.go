@@ -19,7 +19,7 @@ type StoryRepository interface {
 	DeleteChapter(ctx context.Context, id uuid.UUID) error
 
 	// 章节排序
-	ReorderChapters(ctx context.Context, groupChatID uuid.UUID, chapterOrders []domain.ChapterOrder) error
+	ReorderChapters(ctx context.Context, groupChatID uuid.UUID, chapterOrders []ChapterOrder) error
 
 	// 章节激活状态
 	ActivateChapter(ctx context.Context, id uuid.UUID) error

@@ -1,0 +1,7 @@
+{
+  "message": "你好",
+  "user_id": "test-user-001",
+  "character_id": "xiaoyu-001",
+  "model": "deepseek-ai/DeepSeek-V3",
+  "temperature": 0.8
+}

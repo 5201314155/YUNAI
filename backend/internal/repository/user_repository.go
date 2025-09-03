@@ -25,6 +25,7 @@ type UserRepository interface {
 
 	// 用户查询
 	List(ctx context.Context, offset, limit int) ([]*domain.User, error)
+	ListActive(ctx context.Context) ([]*domain.User, error)
 	Count(ctx context.Context) (int64, error)
 	ExistsByUsername(ctx context.Context, username string) (bool, error)
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
@@ -209,6 +210,25 @@ func (r *userRepository) List(ctx context.Context, offset, limit int) ([]*domain
 	err := r.db.SelectContext(ctx, &users, query, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list users: %w", err)
+	}
+
+	return users, nil
+}
+
+// ListActive 获取活跃用户列表
+func (r *userRepository) ListActive(ctx context.Context) ([]*domain.User, error) {
+	var users []*domain.User
+	query := `
+		SELECT id, username, email, user_type, nickname, avatar_url, bio,
+			   email_verified, totp_enabled, is_active, is_banned,
+			   last_login_at, login_count, created_at, updated_at
+		FROM users
+		WHERE is_active = true AND is_banned = false
+		ORDER BY last_login_at DESC`
+
+	err := r.db.SelectContext(ctx, &users, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list active users: %w", err)
 	}
 
 	return users, nil

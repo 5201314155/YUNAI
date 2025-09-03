@@ -194,7 +194,7 @@ func (s *userIdentityService) getUserIdentityForMoment(ctx context.Context, user
 
 // getRealUserIdentity 获取用户真实身份
 func (s *userIdentityService) getRealUserIdentity(ctx context.Context, userID uuid.UUID) (*domain.UserIdentity, error) {
-	user, err := s.userRepo.GetUserByID(ctx, userID)
+	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
@@ -216,7 +216,7 @@ func (s *userIdentityService) getRealUserIdentity(ctx context.Context, userID uu
 func (s *userIdentityService) ParseMentionIdentity(ctx context.Context, mention string, userID uuid.UUID) (*domain.UserIdentity, error) {
 	// 移除@符号
 	cleanMention := strings.TrimPrefix(mention, "@")
-	
+
 	// 如果@的是"用户"，则使用真实昵称
 	if cleanMention == "用户" {
 		return s.getRealUserIdentity(ctx, userID)
@@ -242,10 +242,10 @@ func (s *userIdentityService) ReplaceUserReferences(ctx context.Context, content
 
 	// 替换常见的用户引用
 	replacements := map[string]string{
-		"用户":   targetIdentity.DisplayName,
-		"@用户":  "@" + targetIdentity.DisplayName,
-		"你":    targetIdentity.DisplayName,
-		"您":    targetIdentity.DisplayName,
+		"用户":  targetIdentity.DisplayName,
+		"@用户": "@" + targetIdentity.DisplayName,
+		"你":   targetIdentity.DisplayName,
+		"您":   targetIdentity.DisplayName,
 	}
 
 	result := content

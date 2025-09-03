@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 YUNAI实时聊天测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .chat-container {
+            width: 420px;
+            height: 650px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .chat-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .chat-subtitle {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        .model-selector {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.8em;
+        }
+
+        .model-selector select {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 0.9em;
+        }
+
+        .model-selector select option {
+            background: #667eea;
+            color: white;
+        }
+
+        .temperature-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .temperature-control input[type="range"] {
+            width: 60px;
+        }
+
+        #temperatureValue {
+            min-width: 25px;
+            font-weight: bold;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.ai {
+            justify-content: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.ai .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin: 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: #667eea;
+            color: white;
+        }
+        
+        .message.ai .message-avatar {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            gap: 8px;
+        }
+        
+        .voice-btn {
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .voice-btn:hover {
+            background: #5a4a7a;
+        }
+        
+        .voice-btn.playing {
+            background: #28a745;
+        }
+        
+        .voice-status {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .quick-messages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .quick-msg {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-msg:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-field:focus {
+            border-color: #667eea;
+        }
+        
+        .send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            min-width: 60px;
+        }
+        
+        .send-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status-bar {
+            padding: 8px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .status-bar.generating {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-bar.playing {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-bar.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px 0;
+            color: #666;
+            font-style: italic;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+        
+        .connection-status.disconnected {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="connection-status" id="connectionStatus"></div>
+            <div class="chat-title">🎯 YUNAI实时聊天</div>
+            <div class="chat-subtitle">与AI小雨对话 • 实时语音生成</div>
+            <div class="model-selector">
+                <select id="modelSelect" onchange="onModelChange()">
+                    <option value="">加载模型中...</option>
+                </select>
+                <span class="temperature-control">
+                    温度: <input type="range" id="temperatureSlider" min="0.1" max="2.0" step="0.1" value="0.8" onchange="updateTemperature()">
+                    <span id="temperatureValue">0.8</span>
+                </span>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai" id="welcomeMessage">
+                <div class="message-avatar">🤖</div>
+                <div>
+                    <div class="message-bubble" id="welcomeText">
+                        正在加载欢迎消息...
+                    </div>
+                    <div class="voice-controls">
+                        <button class="voice-btn" id="welcomePlayBtn" onclick="playWelcomeVoice()">🔊 加载中...</button>
+                        <span class="voice-status">实时生成语音</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            🤖 小雨正在思考并生成语音中...
+        </div>
+        
+        <div class="status-bar" id="statusBar">
+            🔗 连接服务器中...
+        </div>
+        
+        <div class="chat-input">
+            <div class="quick-messages">
+                <div class="quick-msg" onclick="sendQuickMessage('你好，小雨！')">👋 你好</div>
+                <div class="quick-msg" onclick="sendQuickMessage('我今天心情不太好')">😔 心情不好</div>
+                <div class="quick-msg" onclick="sendQuickMessage('谢谢你的帮助')">🙏 感谢</div>
+                <div class="quick-msg" onclick="sendQuickMessage('我们聊点轻松的话题吧')">😊 轻松聊天</div>
+                <div class="quick-msg" onclick="sendQuickMessage('工作压力很大')">💼 工作压力</div>
+                <div class="quick-msg" onclick="sendQuickMessage('感觉有点孤单')">😞 孤单</div>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" class="input-field" id="messageInput" 
+                       placeholder="输入消息..." 
+                       onkeypress="handleKeyPress(event)">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置
+        const API_BASE = 'http://localhost:8081';
+        const CHAT_API = `${API_BASE}/api/chat`;
+        const WELCOME_API = `${API_BASE}/api/welcome`;
+        const MODELS_API = `${API_BASE}/api/models`;
+        const HEALTH_API = `${API_BASE}/api/health`;
+
+        let isGenerating = false;
+        let currentAudio = null;
+        let messageCounter = 0;
+        let welcomeAudioData = null;
+        let availableModels = [];
+        let currentModel = '';
+        let currentTemperature = 0.8;
+        
+        // 页面加载完成后初始化
+        window.onload = function() {
+            console.log('YUNAI实时聊天页面加载完成');
+            checkServerConnection();
+            loadAvailableModels();
+            loadWelcomeMessage();
+            document.getElementById('messageInput').focus();
+        };
+        
+        // 检查服务器连接
+        async function checkServerConnection() {
+            try {
+                const response = await fetch(HEALTH_API);
+                if (response.ok) {
+                    updateConnectionStatus(true);
+                    updateStatus('✅ 服务器连接成功 • 可以开始聊天', '');
+                } else {
+                    throw new Error('服务器响应异常');
+                }
+            } catch (error) {
+                console.error('服务器连接失败:', error);
+                updateConnectionStatus(false);
+                updateStatus('❌ 服务器连接失败 • 请启动后端服务', 'error');
+            }
+        }
+        
+        // 更新连接状态
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            status.className = `connection-status ${connected ? '' : 'disconnected'}`;
+        }
+
+        // 加载可用模型列表
+        async function loadAvailableModels() {
+            try {
+                const response = await fetch(MODELS_API);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.models) {
+                    availableModels = data.models;
+                    populateModelSelector();
+                    console.log(`加载了 ${data.count} 个可用模型`);
+                } else {
+                    throw new Error('模型数据格式错误');
+                }
+
+            } catch (error) {
+                console.error('加载模型列表失败:', error);
+                // 使用默认模型
+                availableModels = [{
+                    id: 'deepseek-ai/DeepSeek-V3',
+                    name: 'DeepSeek-V3',
+                    description: '默认模型',
+                    default: true
+                }];
+                populateModelSelector();
+            }
+        }
+
+        // 填充模型选择器
+        function populateModelSelector() {
+            const modelSelect = document.getElementById('modelSelect');
+            modelSelect.innerHTML = '';
+
+            availableModels.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.id;
+                option.textContent = `${model.name} - ${model.description}`;
+
+                if (model.default) {
+                    option.selected = true;
+                    currentModel = model.id;
+                }
+
+                modelSelect.appendChild(option);
+            });
+
+            console.log(`当前选择模型: ${currentModel}`);
+        }
+
+        // 模型切换处理
+        function onModelChange() {
+            const modelSelect = document.getElementById('modelSelect');
+            const selectedModel = modelSelect.value;
+
+            if (selectedModel !== currentModel) {
+                currentModel = selectedModel;
+                const modelInfo = availableModels.find(m => m.id === selectedModel);
+
+                console.log(`切换到模型: ${selectedModel}`);
+                updateStatus(`🔄 已切换到 ${modelInfo ? modelInfo.name : selectedModel}`, '');
+
+                // 可以在这里添加模型切换的提示消息
+                if (modelInfo) {
+                    setTimeout(() => {
+                        updateStatus(`✅ 当前模型: ${modelInfo.name} • 开始聊天吧`, '');
+                    }, 1500);
+                }
+            }
+        }
+
+        // 温度调节处理
+        function updateTemperature() {
+            const slider = document.getElementById('temperatureSlider');
+            const valueSpan = document.getElementById('temperatureValue');
+
+            currentTemperature = parseFloat(slider.value);
+            valueSpan.textContent = currentTemperature.toFixed(1);
+
+            console.log(`调整温度到: ${currentTemperature}`);
+
+            // 显示温度说明
+            let tempDesc = '';
+            if (currentTemperature <= 0.3) {
+                tempDesc = '保守';
+            } else if (currentTemperature <= 0.7) {
+                tempDesc = '平衡';
+            } else if (currentTemperature <= 1.2) {
+                tempDesc = '创意';
+            } else {
+                tempDesc = '随机';
+            }
+
+            updateStatus(`🌡️ 温度: ${currentTemperature} (${tempDesc}) • 影响回复的创造性`, '');
+        }
+
+        // 加载欢迎消息和语音
+        async function loadWelcomeMessage() {
+            try {
+                updateStatus('🔊 正在生成欢迎语音...', 'generating');
+
+                const response = await fetch(WELCOME_API);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 更新欢迎消息文本
+                    document.getElementById('welcomeText').textContent = data.message;
+
+                    // 保存语音数据
+                    welcomeAudioData = data.audio_data;
+
+                    // 更新播放按钮
+                    const playBtn = document.getElementById('welcomePlayBtn');
+                    playBtn.textContent = '🔊 播放';
+                    playBtn.disabled = false;
+
+                    updateStatus('✅ 欢迎语音已准备就绪 • 点击播放按钮试听', '');
+
+                    // 自动播放欢迎语音
+                    setTimeout(() => {
+                        playWelcomeVoice();
+                    }, 1000);
+
+                } else {
+                    throw new Error(data.error || '未知错误');
+                }
+
+            } catch (error) {
+                console.error('加载欢迎消息失败:', error);
+                document.getElementById('welcomeText').textContent = '你好！我是YUNAI的AI助手小雨，很高兴见到你！';
+                document.getElementById('welcomePlayBtn').textContent = '❌ 语音失败';
+                updateStatus('❌ 欢迎语音加载失败 • 可以开始聊天', 'error');
+            }
+        }
+        
+        // 处理键盘事件
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        // 发送快速消息
+        function sendQuickMessage(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+        
+        // 发送消息
+        async function sendMessage() {
+            if (isGenerating) return;
+            
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // 显示用户消息
+            addUserMessage(message);
+            
+            // 清空输入框
+            input.value = '';
+            
+            // 显示生成中状态
+            showGenerating();
+            
+            try {
+                // 调用实时聊天API
+                const response = await fetch(CHAT_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: 'test-user',
+                        character_id: 'xiaoyu',
+                        model: currentModel,
+                        temperature: currentTemperature
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 添加AI消息
+                    addAIMessage(data.message, data.emotion, data.audio_data);
+                } else {
+                    throw new Error(data.error || '未知错误');
+                }
+                
+            } catch (error) {
+                console.error('聊天请求失败:', error);
+                addErrorMessage(`聊天失败: ${error.message}`);
+                updateStatus('❌ 聊天请求失败 • 请检查服务器', 'error');
+            }
+            
+            hideGenerating();
+        }
+        
+        // 添加用户消息
+        function addUserMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            messageDiv.innerHTML = `
+                <div>
+                    <div class="message-bubble">${escapeHtml(message)}</div>
+                    <div class="voice-status">用户消息 • 不生成语音</div>
+                </div>
+                <div class="message-avatar">👤</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        // 添加AI消息
+        function addAIMessage(message, emotion, audioData) {
+            const messagesContainer = document.getElementById('chatMessages');
+            messageCounter++;
+
+            // 获取当前模型信息
+            const modelInfo = availableModels.find(m => m.id === currentModel);
+            const modelName = modelInfo ? modelInfo.name : currentModel;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div>
+                    <div class="message-bubble">${escapeHtml(message)}</div>
+                    <div class="voice-controls">
+                        <button class="voice-btn" onclick="playAIVoice('${messageCounter}')">🔊 播放</button>
+                        <button class="voice-btn" onclick="stopAudio()">⏹️ 停止</button>
+                        <span class="voice-status">${modelName} • ${emotion} • T=${currentTemperature}</span>
+                    </div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+
+            // 保存音频数据
+            if (audioData) {
+                window[`audioData_${messageCounter}`] = audioData;
+
+                // 自动播放语音
+                setTimeout(() => {
+                    playAIVoice(messageCounter);
+                }, 500);
+            }
+
+            scrollToBottom();
+        }
+        
+        // 添加错误消息
+        function addErrorMessage(errorMsg) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">⚠️</div>
+                <div>
+                    <div class="message-bubble" style="background: #f8d7da; color: #721c24; border-color: #f5c6cb;">
+                        ${escapeHtml(errorMsg)}
+                    </div>
+                    <div class="voice-status">系统错误</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // 播放欢迎语音
+        function playWelcomeVoice() {
+            if (!welcomeAudioData) {
+                updateStatus('❌ 欢迎语音数据不存在', 'error');
+                return;
+            }
+
+            // 停止当前播放的音频
+            stopAudio();
+
+            // 创建音频URL
+            const audioBlob = base64ToBlob(welcomeAudioData, 'audio/mpeg');
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            // 创建音频元素
+            currentAudio = new Audio(audioUrl);
+
+            // 设置事件监听
+            currentAudio.onplay = function() {
+                updateStatus('🔊 正在播放欢迎语音...', 'playing');
+                updatePlayButtons(true);
+            };
+
+            currentAudio.onended = function() {
+                updateStatus('✅ 欢迎！发送消息开始聊天吧', '');
+                updatePlayButtons(false);
+                URL.revokeObjectURL(audioUrl);
+                currentAudio = null;
+            };
+
+            currentAudio.onerror = function(e) {
+                console.error('欢迎语音播放失败:', e);
+                updateStatus('❌ 欢迎语音播放失败', 'error');
+                updatePlayButtons(false);
+                URL.revokeObjectURL(audioUrl);
+                currentAudio = null;
+            };
+
+            // 播放音频
+            currentAudio.play().catch(function(error) {
+                console.error('播放失败:', error);
+                updateStatus('❌ 欢迎语音播放失败 • 请检查浏览器设置', 'error');
+                updatePlayButtons(false);
+            });
+        }
+
+        // 播放AI语音
+        function playAIVoice(messageId) {
+            const audioData = window[`audioData_${messageId}`];
+            
+            if (!audioData) {
+                updateStatus('❌ 语音数据不存在', 'error');
+                return;
+            }
+            
+            // 停止当前播放的音频
+            stopAudio();
+            
+            // 创建音频URL
+            const audioBlob = base64ToBlob(audioData, 'audio/mpeg');
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            // 创建音频元素
+            currentAudio = new Audio(audioUrl);
+            
+            // 设置事件监听
+            currentAudio.onplay = function() {
+                updateStatus('🔊 正在播放AI语音...', 'playing');
+                updatePlayButtons(true);
+            };
+            
+            currentAudio.onended = function() {
+                updateStatus('✅ 语音播放完成', '');
+                updatePlayButtons(false);
+                URL.revokeObjectURL(audioUrl);
+                currentAudio = null;
+            };
+            
+            currentAudio.onerror = function(e) {
+                console.error('音频播放失败:', e);
+                updateStatus('❌ 语音播放失败', 'error');
+                updatePlayButtons(false);
+                URL.revokeObjectURL(audioUrl);
+                currentAudio = null;
+            };
+            
+            // 播放音频
+            currentAudio.play().catch(function(error) {
+                console.error('播放失败:', error);
+                updateStatus('❌ 语音播放失败 • 请检查浏览器设置', 'error');
+                updatePlayButtons(false);
+            });
+        }
+        
+        // 停止音频播放
+        function stopAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            updatePlayButtons(false);
+            updateStatus('⏹️ 语音播放已停止', '');
+        }
+        
+        // 更新播放按钮状态
+        function updatePlayButtons(isPlaying) {
+            const buttons = document.querySelectorAll('.voice-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes('播放')) {
+                    btn.classList.toggle('playing', isPlaying);
+                    btn.textContent = isPlaying ? '🔊 播放中...' : '🔊 播放';
+                }
+            });
+        }
+        
+        // 显示生成中状态
+        function showGenerating() {
+            isGenerating = true;
+            document.getElementById('typingIndicator').style.display = 'block';
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('sendBtn').textContent = '生成中...';
+            updateStatus('🤖 AI正在生成回复和语音...', 'generating');
+        }
+        
+        // 隐藏生成中状态
+        function hideGenerating() {
+            isGenerating = false;
+            document.getElementById('typingIndicator').style.display = 'none';
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('sendBtn').textContent = '发送';
+            updateStatus('✅ 准备就绪 • 发送消息继续聊天', '');
+        }
+        
+        // 更新状态栏
+        function updateStatus(message, className) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = message;
+            statusBar.className = `status-bar ${className}`;
+        }
+        
+        // 滚动到底部
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // 工具函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function base64ToBlob(base64, mimeType) {
+            const byteCharacters = atob(base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            return new Blob([byteArray], { type: mimeType });
+        }
+        
+        // 定期检查服务器连接
+        setInterval(checkServerConnection, 30000); // 每30秒检查一次
+    </script>
+</body>
+</html>

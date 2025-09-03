@@ -29,6 +29,7 @@ type RelationshipRepository interface {
 	UpdateCharacterRelationship(ctx context.Context, relationship *domain.CharacterRelationshipEnhanced) error
 	DeleteCharacterRelationship(ctx context.Context, id uuid.UUID) error
 	ListCharacterRelationships(ctx context.Context, characterID uuid.UUID, status *string) ([]*domain.CharacterRelationshipEnhanced, error)
+	GetUserRelationships(ctx context.Context, userID string) ([]domain.Relationship, error)
 
 	// 关系事件管理
 	CreateRelationshipEvent(ctx context.Context, event *domain.RelationshipEvent) error
@@ -310,6 +311,13 @@ func (r *relationshipRepository) ListCharacterRelationships(ctx context.Context,
 	return relationships, err
 }
 
+// GetUserRelationships 获取用户的关系网络
+func (r *relationshipRepository) GetUserRelationships(ctx context.Context, userID string) ([]domain.Relationship, error) {
+	// 简化实现：返回空的关系列表
+	// 在实际实现中，这里应该查询用户与各个角色的关系
+	return []domain.Relationship{}, nil
+}
+
 // CreateRelationshipEvent 创建关系事件
 func (r *relationshipRepository) CreateRelationshipEvent(ctx context.Context, event *domain.RelationshipEvent) error {
 	query := `
@@ -457,7 +465,7 @@ func (r *relationshipRepository) GetRelationshipNetwork(ctx context.Context, cha
 	network := map[string]interface{}{
 		"center_character_id": characterID,
 		"relationships":       relationships,
-		"depth":              1, // 当前只实现深度1
+		"depth":               1, // 当前只实现深度1
 	}
 
 	return network, nil

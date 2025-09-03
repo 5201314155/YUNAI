@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
+	"math/rand"
 	"net"
 	"time"
 
@@ -13,6 +15,7 @@ import (
 	"yunai/internal/domain"
 	"yunai/internal/repository"
 	"yunai/pkg/auth"
+	"yunai/pkg/email"
 )
 
 // AuthService 认证服务接口
@@ -41,15 +44,26 @@ type AuthService interface {
 	GrantPermission(ctx context.Context, userID uuid.UUID, permission string, grantedBy uuid.UUID, expiresAt *time.Time) error
 	RevokePermission(ctx context.Context, userID uuid.UUID, permission string) error
 	HasPermission(ctx context.Context, userID uuid.UUID, permission string) (bool, error)
+
+	// 邮箱验证
+	SendVerificationEmail(ctx context.Context, userID uuid.UUID) error
+	VerifyEmail(ctx context.Context, userID uuid.UUID, code string) error
+	ResendVerificationEmail(ctx context.Context, userID uuid.UUID) error
+
+	// 密码重置
+	SendPasswordResetEmail(ctx context.Context, email string) error
+	ResetPassword(ctx context.Context, token, newPassword string) error
+	ValidateResetToken(ctx context.Context, token string) (*domain.User, error)
 }
 
 // authService 认证服务实现
 type authService struct {
-	userRepo    repository.UserRepository
-	authRepo    repository.AuthRepository
-	jwtManager  *auth.JWTManager
-	totpManager *auth.TOTPManager
-	logger      *logrus.Logger
+	userRepo     repository.UserRepository
+	authRepo     repository.AuthRepository
+	jwtManager   *auth.JWTManager
+	totpManager  *auth.TOTPManager
+	emailService email.EmailService
+	logger       *logrus.Logger
 }
 
 // NewAuthService 创建认证服务
@@ -59,14 +73,17 @@ func NewAuthService(
 	jwtManager *auth.JWTManager,
 	logger *logrus.Logger,
 ) AuthService {
+	// 创建邮件服务（使用Mock服务用于开发测试）
+	emailService := email.NewMockEmailService(logger)
 	totpManager := auth.NewTOTPManager("YUNAI")
 
 	return &authService{
-		userRepo:    userRepo,
-		authRepo:    authRepo,
-		jwtManager:  jwtManager,
-		totpManager: totpManager,
-		logger:      logger,
+		userRepo:     userRepo,
+		authRepo:     authRepo,
+		jwtManager:   jwtManager,
+		totpManager:  totpManager,
+		emailService: emailService,
+		logger:       logger,
 	}
 }
 
@@ -510,4 +527,236 @@ func (s *authService) RevokePermission(ctx context.Context, userID uuid.UUID, pe
 // HasPermission 检查权限
 func (s *authService) HasPermission(ctx context.Context, userID uuid.UUID, permission string) (bool, error) {
 	return s.userRepo.HasPermission(ctx, userID, permission)
+}
+
+// SendVerificationEmail 发送邮箱验证码
+func (s *authService) SendVerificationEmail(ctx context.Context, userID uuid.UUID) error {
+	// 获取用户信息
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	// 生成验证码
+	code, err := s.generateVerificationCode()
+	if err != nil {
+		return fmt.Errorf("failed to generate verification code: %w", err)
+	}
+
+	// 保存验证码到Redis缓存
+	verificationKey := fmt.Sprintf("%s:email_verification", userID.String())
+	if err := s.authRepo.SetVerificationCode(ctx, verificationKey, code, 10*time.Minute); err != nil {
+		return fmt.Errorf("failed to save verification code: %w", err)
+	}
+
+	// 发送邮件
+	if err := s.emailService.SendVerificationEmail(user.Email, user.Username, code); err != nil {
+		return fmt.Errorf("failed to send verification email: %w", err)
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"user_id": userID,
+		"email":   user.Email,
+	}).Info("Verification email sent")
+
+	return nil
+}
+
+// VerifyEmail 验证邮箱
+func (s *authService) VerifyEmail(ctx context.Context, userID uuid.UUID, code string) error {
+	// 获取用户
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	// 验证验证码
+	verificationKey := fmt.Sprintf("%s:email_verification", userID.String())
+	storedCode, err := s.authRepo.GetVerificationCode(ctx, verificationKey)
+	if err != nil {
+		return domain.AppErrInvalidVerificationCode
+	}
+
+	// 检查验证码
+	if storedCode != code {
+		return domain.AppErrInvalidVerificationCode
+	}
+
+	// 删除验证码（标记为已使用）
+	if err := s.authRepo.DeleteVerificationCode(ctx, verificationKey); err != nil {
+		s.logger.WithError(err).Warn("Failed to delete verification code")
+	}
+
+	// 标记邮箱为已验证
+	user.EmailVerified = true
+	user.EmailVerifiedAt = &time.Time{}
+	*user.EmailVerifiedAt = time.Now()
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return fmt.Errorf("failed to update user email verification status: %w", err)
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"user_id": userID,
+		"email":   user.Email,
+	}).Info("Email verified successfully")
+
+	return nil
+}
+
+// ResendVerificationEmail 重新发送验证邮件
+func (s *authService) ResendVerificationEmail(ctx context.Context, userID uuid.UUID) error {
+	// 检查是否已经验证
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	if user.EmailVerified {
+		return domain.AppErrEmailAlreadyVerified
+	}
+
+	// 删除旧的验证码
+	verificationKey := fmt.Sprintf("%s:email_verification", userID.String())
+	if err := s.authRepo.DeleteVerificationCode(ctx, verificationKey); err != nil {
+		s.logger.WithError(err).Warn("Failed to delete old verification codes")
+	}
+
+	// 发送新的验证码
+	return s.SendVerificationEmail(ctx, userID)
+}
+
+// SendPasswordResetEmail 发送密码重置邮件
+func (s *authService) SendPasswordResetEmail(ctx context.Context, email string) error {
+	// 检查用户是否存在
+	user, err := s.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		if err == domain.ErrUserNotFound {
+			// 为了安全，即使用户不存在也返回成功
+			s.logger.WithField("email", email).Warn("Password reset requested for non-existent user")
+			return nil
+		}
+		return fmt.Errorf("failed to get user by email: %w", err)
+	}
+
+	// 生成重置Token
+	resetToken, err := s.generateResetToken()
+	if err != nil {
+		return fmt.Errorf("failed to generate reset token: %w", err)
+	}
+
+	// 保存重置Token到Redis缓存
+	resetKey := fmt.Sprintf("%s:password_reset", resetToken)
+	if err := s.authRepo.SetVerificationCode(ctx, resetKey, user.ID.String(), 30*time.Minute); err != nil {
+		return fmt.Errorf("failed to save reset token: %w", err)
+	}
+
+	// 构建重置URL
+	resetURL := fmt.Sprintf("https://yunai.com/reset-password?token=%s", resetToken)
+
+	// 发送重置邮件
+	if err := s.emailService.SendPasswordResetEmail(email, user.Username, resetURL); err != nil {
+		return fmt.Errorf("failed to send password reset email: %w", err)
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"user_id": user.ID,
+		"email":   email,
+	}).Info("Password reset email sent")
+
+	return nil
+}
+
+// ResetPassword 重置密码
+func (s *authService) ResetPassword(ctx context.Context, token, newPassword string) error {
+	// 验证重置Token
+	user, err := s.ValidateResetToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	// 加密新密码
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// 更新密码
+	user.PasswordHash = string(passwordHash)
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return fmt.Errorf("failed to update password: %w", err)
+	}
+
+	// 标记重置Token为已使用
+	if err := s.markResetTokenAsUsed(ctx, token); err != nil {
+		s.logger.WithError(err).Warn("Failed to mark reset token as used")
+	}
+
+	// 删除所有会话，强制重新登录
+	if err := s.userRepo.DeleteUserSessions(ctx, user.ID); err != nil {
+		s.logger.WithError(err).Warn("Failed to delete user sessions after password reset")
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"user_id": user.ID,
+		"email":   user.Email,
+	}).Info("Password reset successfully")
+
+	return nil
+}
+
+// ValidateResetToken 验证重置Token
+func (s *authService) ValidateResetToken(ctx context.Context, token string) (*domain.User, error) {
+	// 从Redis获取用户ID
+	resetKey := fmt.Sprintf("%s:password_reset", token)
+	userIDStr, err := s.authRepo.GetVerificationCode(ctx, resetKey)
+	if err != nil {
+		return nil, domain.AppErrInvalidResetToken
+	}
+
+	// 解析用户ID
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return nil, domain.AppErrInvalidResetToken
+	}
+
+	// 获取用户信息
+	user, err := s.userRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return user, nil
+}
+
+// generateVerificationCode 生成验证码
+func (s *authService) generateVerificationCode() (string, error) {
+	// 生成6位数字验证码
+	bytes := make([]byte, 3)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+
+	// 转换为6位数字
+	code := ""
+	for _, b := range bytes {
+		code += fmt.Sprintf("%02d", int(b)%100)
+	}
+
+	return code[:6], nil
+}
+
+// generateResetToken 生成重置Token
+func (s *authService) generateResetToken() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
+}
+
+// markResetTokenAsUsed 标记重置Token为已使用
+func (s *authService) markResetTokenAsUsed(ctx context.Context, token string) error {
+	// 删除Redis中的重置Token
+	resetKey := fmt.Sprintf("%s:password_reset", token)
+	return s.authRepo.DeleteVerificationCode(ctx, resetKey)
 }

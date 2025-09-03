@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 YUNAI完整功能测试平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .card-subtitle {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .test-controls {
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            margin-bottom: 10px;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .control-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        
+        .control-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9em;
+            background: white;
+        }
+        
+        .control-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9em;
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .test-result {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.85em;
+        }
+        
+        .result-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .result-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .result-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .character-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            margin: 10px auto;
+        }
+        
+        .chat-preview {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .chat-message {
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+        
+        .chat-user {
+            background: #667eea;
+            color: white;
+            margin-left: 20px;
+            text-align: right;
+        }
+        
+        .chat-ai {
+            background: white;
+            color: #333;
+            margin-right: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-online {
+            background: #28a745;
+        }
+        
+        .status-offline {
+            background: #dc3545;
+        }
+        
+        .status-busy {
+            background: #ffc107;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .feature-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .feature-item:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+        
+        .feature-icon {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        .feature-name {
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 YUNAI完整功能测试平台</h1>
+            <p>测试单聊、群聊、朋友圈、关系网、世界观、角色系统等所有核心功能</p>
+        </div>
+        
+        <div class="test-grid">
+            <!-- 单聊测试 -->
+            <div class="test-card">
+                <div class="card-header">
+                    <div class="card-icon">💬</div>
+                    <div>
+                        <div class="card-title">单聊测试</div>
+                        <div class="card-subtitle">一对一聊天，自动获取角色背景</div>
+                    </div>
+                </div>
+                
+                <div class="test-controls">
+                    <div class="control-group">
+                        <label class="control-label">选择聊天角色</label>
+                        <select class="control-select" id="singleChatCharacter">
+                            <option value="xiaoyu">小雨 - 温柔善良的AI助手</option>
+                            <option value="xiaoming">小明 - 阳光开朗的大学生</option>
+                            <option value="teacher_wang">王老师 - 经验丰富的教师</option>
+                            <option value="doctor_li">李医生 - 专业的医疗专家</option>
+                            <option value="artist_chen">陈画家 - 富有创意的艺术家</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">聊天消息</label>
+                        <input type="text" class="control-input" id="singleChatMessage" 
+                               placeholder="输入你想说的话..." value="你好，最近怎么样？">
+                    </div>
+                </div>
+                
+                <div>
+                    <button class="btn btn-primary" onclick="testSingleChat()">开始单聊</button>
+                    <button class="btn btn-info" onclick="getCharacterBackground()">获取角色背景</button>
+                    <button class="btn btn-warning" onclick="switchCharacterAvatar()">切换角色图</button>
+                </div>
+                
+                <div class="character-avatar" id="singleChatAvatar">🤖</div>
+                
+                <div class="test-result" id="singleChatResult">
+                    <div class="result-info">等待测试...</div>
+                </div>
+            </div>
+            
+            <!-- 群聊测试 -->
+            <div class="test-card">
+                <div class="card-header">
+                    <div class="card-icon">👥</div>
+                    <div>
+                        <div class="card-title">群聊测试</div>
+                        <div class="card-subtitle">多人聊天，设置群聊背景</div>
+                    </div>
+                </div>
+                
+                <div class="test-controls">
+                    <div class="control-group">
+                        <label class="control-label">群聊场景</label>
+                        <select class="control-select" id="groupChatScene">
+                            <option value="classroom">教室讨论 - 学术氛围</option>
+                            <option value="office">办公室 - 工作环境</option>
+                            <option value="cafe">咖啡厅 - 休闲聊天</option>
+                            <option value="park">公园 - 户外活动</option>
+                            <option value="library">图书馆 - 安静学习</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">参与角色 (多选)</label>
+                        <div class="feature-grid">
+                            <div class="feature-item" onclick="toggleGroupMember('xiaoyu')">
+                                <div class="feature-icon">🤖</div>
+                                <div class="feature-name">小雨</div>
+                            </div>
+                            <div class="feature-item" onclick="toggleGroupMember('xiaoming')">
+                                <div class="feature-icon">👨‍🎓</div>
+                                <div class="feature-name">小明</div>
+                            </div>
+                            <div class="feature-item" onclick="toggleGroupMember('teacher_wang')">
+                                <div class="feature-icon">👩‍🏫</div>
+                                <div class="feature-name">王老师</div>
+                            </div>
+                            <div class="feature-item" onclick="toggleGroupMember('doctor_li')">
+                                <div class="feature-icon">👨‍⚕️</div>
+                                <div class="feature-name">李医生</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">群聊话题</label>
+                        <input type="text" class="control-input" id="groupChatTopic" 
+                               placeholder="输入讨论话题..." value="大家觉得AI技术的发展怎么样？">
+                    </div>
+                </div>
+                
+                <div>
+                    <button class="btn btn-primary" onclick="testGroupChat()">开始群聊</button>
+                    <button class="btn btn-success" onclick="setGroupBackground()">设置背景</button>
+                    <button class="btn btn-warning" onclick="triggerGroupEvent()">触发事件</button>
+                </div>
+                
+                <div class="test-result" id="groupChatResult">
+                    <div class="result-info">等待测试...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-grid">
+            <!-- 朋友圈测试 -->
+            <div class="test-card">
+                <div class="card-header">
+                    <div class="card-icon">📱</div>
+                    <div>
+                        <div class="card-title">朋友圈测试</div>
+                        <div class="card-subtitle">动态发布，互动评论</div>
+                    </div>
+                </div>
+                
+                <div class="test-controls">
+                    <div class="control-group">
+                        <label class="control-label">动态类型</label>
+                        <select class="control-select" id="momentsType">
+                            <option value="text">纯文字动态</option>
+                            <option value="image">图片动态</option>
+                            <option value="video">视频动态</option>
+                            <option value="link">链接分享</option>
+                            <option value="mood">心情状态</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">动态内容</label>
+                        <textarea class="control-textarea" id="momentsContent" 
+                                  placeholder="输入动态内容...">今天天气真好，心情也跟着好起来了！☀️</textarea>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">可见范围</label>
+                        <select class="control-select" id="momentsVisibility">
+                            <option value="public">公开</option>
+                            <option value="friends">仅朋友可见</option>
+                            <option value="private">仅自己可见</option>
+                            <option value="custom">自定义分组</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <button class="btn btn-primary" onclick="publishMoments()">发布动态</button>
+                    <button class="btn btn-success" onclick="generateMomentsAI()">AI生成</button>
+                    <button class="btn btn-info" onclick="getMomentsInteraction()">查看互动</button>
+                </div>
+                
+                <div class="test-result" id="momentsResult">
+                    <div class="result-info">等待测试...</div>
+                </div>
+            </div>
+            
+            <!-- 关系网测试 -->
+            <div class="test-card">
+                <div class="card-header">
+                    <div class="card-icon">🕸️</div>
+                    <div>
+                        <div class="card-title">关系网测试</div>
+                        <div class="card-subtitle">人物关系，社交网络</div>
+                    </div>
+                </div>
+                
+                <div class="test-controls">
+                    <div class="control-group">
+                        <label class="control-label">关系类型</label>
+                        <select class="control-select" id="relationshipType">
+                            <option value="friend">朋友关系</option>
+                            <option value="family">家庭关系</option>
+                            <option value="colleague">同事关系</option>
+                            <option value="romantic">恋爱关系</option>
+                            <option value="mentor">师生关系</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">关系强度</label>
+                        <input type="range" class="control-input" id="relationshipStrength" 
+                               min="1" max="10" value="5" oninput="updateRelationshipValue(this.value)">
+                        <span id="relationshipValue">5</span> / 10
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">互动历史</label>
+                        <select class="control-select" id="interactionHistory">
+                            <option value="frequent">频繁互动</option>
+                            <option value="occasional">偶尔互动</option>
+                            <option value="rare">很少互动</option>
+                            <option value="new">新建关系</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <button class="btn btn-primary" onclick="analyzeRelationship()">分析关系</button>
+                    <button class="btn btn-success" onclick="buildRelationshipNetwork()">构建网络</button>
+                    <button class="btn btn-warning" onclick="predictRelationship()">关系预测</button>
+                </div>
+                
+                <div class="test-result" id="relationshipResult">
+                    <div class="result-info">等待测试...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-grid">
+            <!-- 世界观测试 -->
+            <div class="test-card">
+                <div class="card-header">
+                    <div class="card-icon">🌍</div>
+                    <div>
+                        <div class="card-title">世界观测试</div>
+                        <div class="card-subtitle">背景设定，环境构建</div>
+                    </div>
+                </div>
+                
+                <div class="test-controls">
+                    <div class="control-group">
+                        <label class="control-label">世界类型</label>
+                        <select class="control-select" id="worldType">
+                            <option value="modern">现代都市</option>
+                            <option value="fantasy">奇幻世界</option>
+                            <option value="scifi">科幻未来</option>
+                            <option value="historical">历史古代</option>
+                            <option value="campus">校园生活</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">时间设定</label>
+                        <input type="text" class="control-input" id="worldTime" 
+                               placeholder="例如：2024年春天，下午3点" value="2024年春天，阳光明媚的下午">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">地点描述</label>
+                        <textarea class="control-textarea" id="worldLocation" 
+                                  placeholder="描述具体地点...">一所现代化的大学校园，樱花盛开，学生们在草坪上休息聊天</textarea>
+                    </div>
+                </div>
+                
+                <div>
+                    <button class="btn btn-primary" onclick="buildWorldView()">构建世界观</button>
+                    <button class="btn btn-success" onclick="generateWorldEvents()">生成事件</button>
+                    <button class="btn btn-info" onclick="getWorldStatus()">世界状态</button>
+                </div>
+                
+                <div class="test-result" id="worldViewResult">
+                    <div class="result-info">等待测试...</div>
+                </div>
+            </div>
+            
+            <!-- 剧情触发测试 -->
+            <div class="test-card">
+                <div class="card-header">
+                    <div class="card-icon">🎭</div>
+                    <div>
+                        <div class="card-title">剧情触发测试</div>
+                        <div class="card-subtitle">动态剧情，事件触发</div>
+                    </div>
+                </div>
+                
+                <div class="test-controls">
+                    <div class="control-group">
+                        <label class="control-label">剧情类型</label>
+                        <select class="control-select" id="plotType">
+                            <option value="romance">浪漫剧情</option>
+                            <option value="adventure">冒险剧情</option>
+                            <option value="mystery">悬疑剧情</option>
+                            <option value="comedy">喜剧剧情</option>
+                            <option value="drama">戏剧剧情</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">触发条件</label>
+                        <select class="control-select" id="triggerCondition">
+                            <option value="time">时间触发</option>
+                            <option value="location">地点触发</option>
+                            <option value="relationship">关系触发</option>
+                            <option value="keyword">关键词触发</option>
+                            <option value="random">随机触发</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">剧情强度</label>
+                        <input type="range" class="control-input" id="plotIntensity" 
+                               min="1" max="10" value="5" oninput="updatePlotValue(this.value)">
+                        <span id="plotValue">5</span> / 10
+                    </div>
+                </div>
+                
+                <div>
+                    <button class="btn btn-primary" onclick="triggerPlot()">触发剧情</button>
+                    <button class="btn btn-success" onclick="generatePlotBranch()">生成分支</button>
+                    <button class="btn btn-warning" onclick="getPlotHistory()">剧情历史</button>
+                </div>
+                
+                <div class="test-result" id="plotResult">
+                    <div class="result-info">等待测试...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let selectedGroupMembers = new Set(['xiaoyu']);
+        let currentCharacter = 'xiaoyu';
+        let testResults = {};
+        
+        // 角色数据
+        const characters = {
+            xiaoyu: {
+                name: '小雨',
+                avatar: '🤖',
+                background: '温柔善良的AI助手，喜欢帮助他人，对世界充满好奇',
+                personality: '温柔、善良、聪明、有耐心',
+                interests: ['科技', '音乐', '阅读', '帮助他人']
+            },
+            xiaoming: {
+                name: '小明',
+                avatar: '👨‍🎓',
+                background: '阳光开朗的大学生，计算机专业，热爱编程和游戏',
+                personality: '开朗、活泼、聪明、有创造力',
+                interests: ['编程', '游戏', '运动', '交友']
+            },
+            teacher_wang: {
+                name: '王老师',
+                avatar: '👩‍🏫',
+                background: '经验丰富的教师，教授文学课程，关爱学生',
+                personality: '严谨、关爱、有耐心、博学',
+                interests: ['文学', '教育', '阅读', '写作']
+            },
+            doctor_li: {
+                name: '李医生',
+                avatar: '👨‍⚕️',
+                background: '专业的医疗专家，内科医生，医术精湛',
+                personality: '专业、严谨、负责、温和',
+                interests: ['医学', '健康', '研究', '帮助患者']
+            },
+            artist_chen: {
+                name: '陈画家',
+                avatar: '🎨',
+                background: '富有创意的艺术家，擅长油画和数字艺术',
+                personality: '创意、敏感、浪漫、独立',
+                interests: ['绘画', '艺术', '创作', '美学']
+            }
+        };
+        
+        // 工具函数
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const resultItem = document.createElement('div');
+            resultItem.className = `result-item result-${type}`;
+            resultItem.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            container.appendChild(resultItem);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function clearResults(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '<div class="result-info">等待测试...</div>';
+        }
+        
+        // 单聊测试功能
+        function testSingleChat() {
+            const character = document.getElementById('singleChatCharacter').value;
+            const message = document.getElementById('singleChatMessage').value;
+            
+            clearResults('singleChatResult');
+            addResult('singleChatResult', `开始与${characters[character].name}的单聊测试`, 'info');
+            addResult('singleChatResult', `用户: ${message}`, 'success');
+            
+            // 模拟AI回复
+            setTimeout(() => {
+                const aiReply = generateAIReply(character, message);
+                addResult('singleChatResult', `${characters[character].name}: ${aiReply}`, 'success');
+                addResult('singleChatResult', '🔊 正在生成语音回复...', 'info');
+                
+                setTimeout(() => {
+                    addResult('singleChatResult', '✅ 语音生成完成，自动播放', 'success');
+                }, 1000);
+            }, 1500);
+        }
+        
+        function getCharacterBackground() {
+            const character = document.getElementById('singleChatCharacter').value;
+            const charData = characters[character];
+            
+            clearResults('singleChatResult');
+            addResult('singleChatResult', `获取${charData.name}的角色背景`, 'info');
+            addResult('singleChatResult', `背景: ${charData.background}`, 'success');
+            addResult('singleChatResult', `性格: ${charData.personality}`, 'success');
+            addResult('singleChatResult', `兴趣: ${charData.interests.join(', ')}`, 'success');
+        }
+        
+        function switchCharacterAvatar() {
+            const character = document.getElementById('singleChatCharacter').value;
+            const avatar = document.getElementById('singleChatAvatar');
+            const charData = characters[character];
+            
+            avatar.textContent = charData.avatar;
+            addResult('singleChatResult', `切换到${charData.name}的头像: ${charData.avatar}`, 'success');
+        }
+        
+        // 群聊测试功能
+        function toggleGroupMember(memberId) {
+            const memberElement = event.target.closest('.feature-item');
+            
+            if (selectedGroupMembers.has(memberId)) {
+                selectedGroupMembers.delete(memberId);
+                memberElement.style.background = '#f8f9fa';
+            } else {
+                selectedGroupMembers.add(memberId);
+                memberElement.style.background = '#d4edda';
+            }
+        }
+        
+        function testGroupChat() {
+            const scene = document.getElementById('groupChatScene').value;
+            const topic = document.getElementById('groupChatTopic').value;
+            
+            clearResults('groupChatResult');
+            addResult('groupChatResult', `开始群聊测试 - 场景: ${scene}`, 'info');
+            addResult('groupChatResult', `参与成员: ${Array.from(selectedGroupMembers).map(id => characters[id].name).join(', ')}`, 'info');
+            addResult('groupChatResult', `讨论话题: ${topic}`, 'success');
+            
+            // 模拟群聊对话
+            let delay = 2000;
+            Array.from(selectedGroupMembers).forEach((memberId, index) => {
+                setTimeout(() => {
+                    const reply = generateGroupReply(memberId, topic, scene);
+                    addResult('groupChatResult', `${characters[memberId].name}: ${reply}`, 'success');
+                }, delay + index * 1500);
+            });
+        }
+        
+        function setGroupBackground() {
+            const scene = document.getElementById('groupChatScene').value;
+            const backgrounds = {
+                classroom: '📚 教室环境已设置：黑板、课桌、投影仪，学术氛围浓厚',
+                office: '💼 办公室环境已设置：电脑、文件、会议桌，工作氛围专业',
+                cafe: '☕ 咖啡厅环境已设置：温馨灯光、轻音乐、咖啡香味',
+                park: '🌳 公园环境已设置：绿树成荫、鸟语花香、微风徐来',
+                library: '📖 图书馆环境已设置：安静氛围、书香阵阵、专注学习'
+            };
+            
+            addResult('groupChatResult', backgrounds[scene], 'success');
+        }
+        
+        function triggerGroupEvent() {
+            const events = [
+                '🎉 突然有人生日，大家开始庆祝',
+                '🌧️ 外面开始下雨，改变了聊天氛围',
+                '📱 有人收到重要消息，话题转向',
+                '🎵 背景音乐响起，大家开始讨论音乐',
+                '🍕 有人提议订外卖，开始讨论美食'
+            ];
+            
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            addResult('groupChatResult', `随机事件触发: ${randomEvent}`, 'info');
+        }
+        
+        // 朋友圈测试功能
+        function publishMoments() {
+            const type = document.getElementById('momentsType').value;
+            const content = document.getElementById('momentsContent').value;
+            const visibility = document.getElementById('momentsVisibility').value;
+            
+            clearResults('momentsResult');
+            addResult('momentsResult', `发布${type}类型的动态`, 'info');
+            addResult('momentsResult', `内容: ${content}`, 'success');
+            addResult('momentsResult', `可见范围: ${visibility}`, 'info');
+            
+            setTimeout(() => {
+                addResult('momentsResult', '✅ 动态发布成功', 'success');
+                addResult('momentsResult', '👍 收到3个赞，2条评论', 'success');
+            }, 1000);
+        }
+        
+        function generateMomentsAI() {
+            const type = document.getElementById('momentsType').value;
+            
+            clearResults('momentsResult');
+            addResult('momentsResult', `AI正在生成${type}类型的动态内容...`, 'info');
+            
+            setTimeout(() => {
+                const aiContent = generateMomentsContent(type);
+                document.getElementById('momentsContent').value = aiContent;
+                addResult('momentsResult', `AI生成内容: ${aiContent}`, 'success');
+            }, 2000);
+        }
+        
+        function getMomentsInteraction() {
+            clearResults('momentsResult');
+            addResult('momentsResult', '获取动态互动数据...', 'info');
+            
+            setTimeout(() => {
+                addResult('momentsResult', '👍 点赞: 小明、王老师、李医生', 'success');
+                addResult('momentsResult', '💬 小明评论: "说得很有道理！"', 'success');
+                addResult('momentsResult', '💬 王老师评论: "年轻人就是有活力"', 'success');
+                addResult('momentsResult', '📊 浏览量: 25次', 'info');
+            }, 1000);
+        }
+        
+        // 关系网测试功能
+        function updateRelationshipValue(value) {
+            document.getElementById('relationshipValue').textContent = value;
+        }
+        
+        function analyzeRelationship() {
+            const type = document.getElementById('relationshipType').value;
+            const strength = document.getElementById('relationshipStrength').value;
+            const history = document.getElementById('interactionHistory').value;
+            
+            clearResults('relationshipResult');
+            addResult('relationshipResult', `分析${type}关系，强度: ${strength}/10`, 'info');
+            addResult('relationshipResult', `互动历史: ${history}`, 'info');
+            
+            setTimeout(() => {
+                addResult('relationshipResult', '📊 关系分析完成', 'success');
+                addResult('relationshipResult', `关系稳定度: ${Math.floor(strength * 10)}%`, 'success');
+                addResult('relationshipResult', `建议互动频率: ${getInteractionSuggestion(strength)}`, 'info');
+            }, 1500);
+        }
+        
+        function buildRelationshipNetwork() {
+            clearResults('relationshipResult');
+            addResult('relationshipResult', '构建关系网络图...', 'info');
+            
+            setTimeout(() => {
+                addResult('relationshipResult', '🕸️ 关系网络构建完成', 'success');
+                addResult('relationshipResult', '核心节点: 小雨 (连接度: 8)', 'success');
+                addResult('relationshipResult', '关系密度: 75%', 'info');
+                addResult('relationshipResult', '发现3个关系群组', 'info');
+            }, 2000);
+        }
+        
+        function predictRelationship() {
+            clearResults('relationshipResult');
+            addResult('relationshipResult', 'AI预测关系发展趋势...', 'info');
+            
+            setTimeout(() => {
+                addResult('relationshipResult', '🔮 关系预测完成', 'success');
+                addResult('relationshipResult', '未来1个月: 关系将加深 (+15%)', 'success');
+                addResult('relationshipResult', '潜在冲突点: 价值观差异', 'info');
+                addResult('relationshipResult', '建议: 增加深度交流', 'info');
+            }, 2500);
+        }
+        
+        // 世界观测试功能
+        function buildWorldView() {
+            const type = document.getElementById('worldType').value;
+            const time = document.getElementById('worldTime').value;
+            const location = document.getElementById('worldLocation').value;
+            
+            clearResults('worldViewResult');
+            addResult('worldViewResult', `构建${type}世界观`, 'info');
+            addResult('worldViewResult', `时间: ${time}`, 'success');
+            addResult('worldViewResult', `地点: ${location}`, 'success');
+            
+            setTimeout(() => {
+                addResult('worldViewResult', '🌍 世界观构建完成', 'success');
+                addResult('worldViewResult', '环境氛围: 温馨和谐', 'info');
+                addResult('worldViewResult', '可触发事件: 5个', 'info');
+            }, 2000);
+        }
+        
+        function generateWorldEvents() {
+            clearResults('worldViewResult');
+            addResult('worldViewResult', '生成世界事件...', 'info');
+            
+            setTimeout(() => {
+                const events = [
+                    '🌸 樱花开始飘落，营造浪漫氛围',
+                    '📚 图书馆举办读书分享会',
+                    '🎵 校园广播播放轻柔音乐',
+                    '☀️ 阳光透过云层洒向大地',
+                    '🐦 小鸟在枝头欢快歌唱'
+                ];
+                
+                events.forEach((event, index) => {
+                    setTimeout(() => {
+                        addResult('worldViewResult', event, 'success');
+                    }, index * 500);
+                });
+            }, 1000);
+        }
+        
+        function getWorldStatus() {
+            clearResults('worldViewResult');
+            addResult('worldViewResult', '获取世界状态...', 'info');
+            
+            setTimeout(() => {
+                addResult('worldViewResult', '🌡️ 温度: 22°C，微风', 'success');
+                addResult('worldViewResult', '👥 人群密度: 适中', 'success');
+                addResult('worldViewResult', '🎭 整体氛围: 轻松愉快', 'success');
+                addResult('worldViewResult', '⏰ 活跃时段: 下午3-5点', 'info');
+            }, 1000);
+        }
+        
+        // 剧情触发测试功能
+        function updatePlotValue(value) {
+            document.getElementById('plotValue').textContent = value;
+        }
+        
+        function triggerPlot() {
+            const type = document.getElementById('plotType').value;
+            const condition = document.getElementById('triggerCondition').value;
+            const intensity = document.getElementById('plotIntensity').value;
+            
+            clearResults('plotResult');
+            addResult('plotResult', `触发${type}剧情，强度: ${intensity}/10`, 'info');
+            addResult('plotResult', `触发条件: ${condition}`, 'info');
+            
+            setTimeout(() => {
+                const plot = generatePlot(type, intensity);
+                addResult('plotResult', `🎭 剧情触发: ${plot}`, 'success');
+                addResult('plotResult', '角色反应生成中...', 'info');
+                
+                setTimeout(() => {
+                    addResult('plotResult', '✅ 所有角色已响应剧情', 'success');
+                }, 1500);
+            }, 2000);
+        }
+        
+        function generatePlotBranch() {
+            clearResults('plotResult');
+            addResult('plotResult', '生成剧情分支...', 'info');
+            
+            setTimeout(() => {
+                addResult('plotResult', '🌿 分支A: 选择帮助朋友', 'success');
+                addResult('plotResult', '🌿 分支B: 选择独自解决', 'success');
+                addResult('plotResult', '🌿 分支C: 寻求老师帮助', 'success');
+                addResult('plotResult', '每个分支将导致不同结果', 'info');
+            }, 1500);
+        }
+        
+        function getPlotHistory() {
+            clearResults('plotResult');
+            addResult('plotResult', '获取剧情历史...', 'info');
+            
+            setTimeout(() => {
+                addResult('plotResult', '📖 第1章: 初次相遇 (已完成)', 'success');
+                addResult('plotResult', '📖 第2章: 友谊建立 (进行中)', 'info');
+                addResult('plotResult', '📖 第3章: 挑战来临 (待触发)', 'info');
+                addResult('plotResult', '总剧情进度: 65%', 'success');
+            }, 1000);
+        }
+        
+        // 辅助函数
+        function generateAIReply(character, message) {
+            const replies = {
+                xiaoyu: [
+                    "我很好呀！最近在学习新的知识，感觉很充实呢～",
+                    "谢谢你的关心！我一直在这里等着和大家聊天呢",
+                    "最近过得很开心，每天都能帮助到不同的朋友"
+                ],
+                xiaoming: [
+                    "哈哈，最近在忙着做项目，不过挺有意思的！",
+                    "还不错啊，刚刚打完游戏，现在来聊聊天放松一下",
+                    "最近在学新的编程语言，感觉脑子都要炸了"
+                ],
+                teacher_wang: [
+                    "最近在准备新学期的课程，希望能给学生们带来更好的体验",
+                    "很好，刚刚批改完作业，看到学生们的进步很欣慰",
+                    "最近在读一本很有趣的文学作品，收获颇丰"
+                ]
+            };
+            
+            const characterReplies = replies[character] || replies.xiaoyu;
+            return characterReplies[Math.floor(Math.random() * characterReplies.length)];
+        }
+        
+        function generateGroupReply(character, topic, scene) {
+            const replies = {
+                xiaoyu: "我觉得AI技术确实发展很快，但最重要的是要用来帮助人类，让生活变得更美好！",
+                xiaoming: "作为学计算机的，我觉得AI真的太酷了！以后说不定我也能开发出厉害的AI",
+                teacher_wang: "从教育角度来看，AI可以帮助个性化教学，但人文关怀还是需要老师来提供",
+                doctor_li: "在医疗领域，AI已经在辅助诊断方面发挥重要作用，但医生的经验判断仍然不可替代"
+            };
+            
+            return replies[character] || "这个话题很有意思，我也想听听大家的看法。";
+        }
+        
+        function generateMomentsContent(type) {
+            const contents = {
+                text: "今天突然想到，生活中最美好的事情往往是那些不经意间的小确幸 ✨",
+                image: "分享一张今天拍的夕阳照片，橙红色的天空真的太美了！🌅",
+                video: "记录一下今天学到的新技能，感觉自己又进步了一点点 📹",
+                link: "推荐一篇很有启发的文章，关于如何在快节奏生活中保持内心平静 🔗",
+                mood: "今天心情特别好，想把这份快乐分享给所有朋友们 😊"
+            };
+            
+            return contents[type] || contents.text;
+        }
+        
+        function getInteractionSuggestion(strength) {
+            if (strength >= 8) return "保持现有频率，关系很稳定";
+            if (strength >= 6) return "建议增加深度交流";
+            if (strength >= 4) return "需要更多互动来加深关系";
+            return "建议主动联系，重建连接";
+        }
+        
+        function generatePlot(type, intensity) {
+            const plots = {
+                romance: [
+                    "在图书馆偶遇心仪的人，四目相对的瞬间",
+                    "雨天共撑一把伞，距离突然拉近",
+                    "收到一封匿名情书，内心忐忑不安"
+                ],
+                adventure: [
+                    "发现一张神秘地图，决定探索未知区域",
+                    "接到紧急任务，需要在限定时间内完成",
+                    "遇到意外困难，需要团队合作解决"
+                ],
+                mystery: [
+                    "发现一个隐藏的秘密，真相扑朔迷离",
+                    "收到神秘线索，开始调查真相",
+                    "目击奇怪事件，决定深入了解"
+                ]
+            };
+            
+            const typePlots = plots[type] || plots.romance;
+            return typePlots[Math.floor(Math.random() * typePlots.length)];
+        }
+        
+        // 页面初始化
+        window.onload = function() {
+            console.log('YUNAI完整功能测试平台加载完成');
+            
+            // 初始化角色头像
+            switchCharacterAvatar();
+            
+            // 添加欢迎信息
+            addResult('singleChatResult', '🌟 欢迎使用YUNAI测试平台！', 'success');
+            addResult('groupChatResult', '👥 群聊功能已就绪', 'info');
+            addResult('momentsResult', '📱 朋友圈系统已启动', 'info');
+            addResult('relationshipResult', '🕸️ 关系网分析引擎已加载', 'info');
+            addResult('worldViewResult', '🌍 世界观构建器已准备', 'info');
+            addResult('plotResult', '🎭 剧情引擎已激活', 'info');
+        };
+    </script>
+</body>
+</html>

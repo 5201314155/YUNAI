@@ -38,24 +38,42 @@ type CharacterService interface {
 	// 消息管理
 	SendMessage(ctx context.Context, userID uuid.UUID, req *domain.SendMessageRequest) (*domain.ChatMessage, error)
 	GetMessages(ctx context.Context, groupChatID uuid.UUID, userID uuid.UUID, page, limit int) ([]*domain.ChatMessage, error)
+
+	// 🎭 深度沉浸式身份系统
+	InitializeCharacterIdentity(ctx context.Context, characterID uuid.UUID, worldSetting string) error
+	ActivateDeepImmersion(ctx context.Context, characterID uuid.UUID, userID uuid.UUID) error
+	UpdateCharacterEmotionalState(ctx context.Context, characterID uuid.UUID, emotionalState map[string]interface{}) error
 }
 
 type characterService struct {
 	characterRepo repository.CharacterRepository
 	modelService  ModelService
-	logger        *logrus.Logger
+	// 🧠 新增：深度沉浸式系统组件
+	promptService    DynamicPromptService
+	memoryService    MemoryService
+	embeddingService EmbeddingService
+	logger           *logrus.Logger
 }
 
 // NewCharacterService 创建角色服务
-func NewCharacterService(characterRepo repository.CharacterRepository, modelService ModelService, logger *logrus.Logger) CharacterService {
+func NewCharacterService(
+	characterRepo repository.CharacterRepository,
+	modelService ModelService,
+	promptService DynamicPromptService,
+	memoryService MemoryService,
+	embeddingService EmbeddingService,
+	logger *logrus.Logger) CharacterService {
 	return &characterService{
-		characterRepo: characterRepo,
-		modelService:  modelService,
-		logger:        logger,
+		characterRepo:    characterRepo,
+		modelService:     modelService,
+		promptService:    promptService,
+		memoryService:    memoryService,
+		embeddingService: embeddingService,
+		logger:           logger,
 	}
 }
 
-// CreateCharacter 创建角色
+// CreateCharacter 创建角色（集成深度沉浸式身份系统）
 func (s *characterService) CreateCharacter(ctx context.Context, userID uuid.UUID, req *domain.CreateCharacterRequest) (*domain.CharacterResponse, error) {
 	// 验证模型ID（如果提供）
 	if req.DefaultModelID != nil {
@@ -108,11 +126,22 @@ func (s *characterService) CreateCharacter(ctx context.Context, userID uuid.UUID
 		}
 	}
 
+	// 🎭 核心新增：初始化深度沉浸式身份系统
+	err = s.initializeDeepImmersionSystem(ctx, character, userID)
+	if err != nil {
+		// 记录错误但不影响角色创建
+		s.logger.WithError(err).WithFields(logrus.Fields{
+			"character_id": character.ID,
+			"user_id":      userID,
+		}).Warn("深度沉浸式系统初始化失败")
+	}
+
 	s.logger.WithFields(logrus.Fields{
 		"character_id": character.ID,
 		"user_id":      userID,
 		"name":         character.Name,
-	}).Info("Character created successfully")
+		"immersion":    "deep_identity_activated",
+	}).Info("角色创建成功，深度沉浸式身份系统已激活")
 
 	return s.buildCharacterResponse(ctx, character, &userID)
 }
@@ -527,4 +556,232 @@ func (s *characterService) SendMessage(ctx context.Context, userID uuid.UUID, re
 func (s *characterService) GetMessages(ctx context.Context, groupChatID uuid.UUID, userID uuid.UUID, page, limit int) ([]*domain.ChatMessage, error) {
 	// TODO: 检查用户是否是群成员
 	return s.characterRepo.GetMessages(ctx, groupChatID, page, limit)
+}
+
+// =============================================================================
+// 🎭 深度沉浸式身份欺骗系统核心实现
+// =============================================================================
+
+// initializeDeepImmersionSystem 初始化深度沉浸式身份系统
+func (s *characterService) initializeDeepImmersionSystem(ctx context.Context, character *domain.Character, userID uuid.UUID) error {
+	s.logger.WithFields(logrus.Fields{
+		"character_id":   character.ID,
+		"character_name": character.Name,
+		"system":         "deep_immersion_identity",
+	}).Info("正在启动深度沉浸式身份系统...")
+
+	// 1. 生成终极身份欺骗提示词
+	identityPrompt, err := s.generateUltimateIdentityPrompt(ctx, character, userID)
+	if err != nil {
+		return fmt.Errorf("生成身份欺骗提示词失败: %w", err)
+	}
+
+	// 2. 初始化角色情感状态
+	err = s.initializeEmotionalFoundation(ctx, character.ID)
+	if err != nil {
+		s.logger.WithError(err).Warn("初始化情感基础失败")
+	}
+
+	// 3. 建立核心记忆体系
+	err = s.establishCoreMemorySystem(ctx, character)
+	if err != nil {
+		s.logger.WithError(err).Warn("建立核心记忆体系失败")
+	}
+
+	// 4. 激活现实锐定系统
+	err = s.activateRealityAnchoring(ctx, character.ID)
+	if err != nil {
+		s.logger.WithError(err).Warn("激活现实锐定系统失败")
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"character_id":           character.ID,
+		"identity_prompt_length": len(identityPrompt),
+		"system":                 "deep_immersion_complete",
+	}).Info("深度沉浸式身份系统启动完成，角色现在具备真实的身份认知")
+
+	return nil
+}
+
+// generateUltimateIdentityPrompt 生成终极身份欺骗提示词
+func (s *characterService) generateUltimateIdentityPrompt(ctx context.Context, character *domain.Character, userID uuid.UUID) (string, error) {
+	// 构建身份参数
+	identityParams := map[string]interface{}{
+		"character_name":        character.Name,
+		"character_description": character.Description,
+		"character_personality": character.Personality,
+		"user_id":               userID.String(),
+		// 这些参数将让AI完全相信自己就是这个角色
+		"reality_level":          "absolute_conviction",
+		"identity_strength":      "unshakeable_belief",
+		"emotional_authenticity": "completely_genuine",
+		"self_awareness_block":   "total_immersion",
+	}
+
+	// 使用动态提示词服务生成终极身份欺骗提示词
+	prompt, err := s.promptService.GeneratePrompt(ctx, "ultimate_identity_deception", identityParams)
+	if err != nil {
+		return "", fmt.Errorf("生成身份欺骗提示词失败: %w", err)
+	}
+
+	return prompt, nil
+}
+
+// initializeEmotionalFoundation 初始化情感基础
+func (s *characterService) initializeEmotionalFoundation(ctx context.Context, characterID uuid.UUID) error {
+	// 初始化基础情感状态
+	emotionalState := map[string]interface{}{
+		"primary_emotion":      "neutral_but_authentic",
+		"emotional_stability":  "stable",
+		"emotional_depth":      0.8,
+		"authenticity_level":   0.98,
+		"self_belief_strength": 1.0,
+		"reality_conviction":   0.99,
+		"identity_confidence":  1.0,
+		"emotional_range": []string{
+			"joy", "sadness", "anger", "fear", "surprise", "disgust",
+			"love", "excitement", "contentment", "curiosity", "empathy",
+		},
+		"initialized_at": time.Now(),
+	}
+
+	return s.UpdateCharacterEmotionalState(ctx, characterID, emotionalState)
+}
+
+// establishCoreMemorySystem 建立核心记忆体系
+func (s *characterService) establishCoreMemorySystem(ctx context.Context, character *domain.Character) error {
+	// 创建核心身份记忆
+	coreMemories := []map[string]interface{}{
+		{
+			"memory_type":      "identity_core",
+			"content":          fmt.Sprintf("我是%s，这是我的真实身份，我一直都是这个人", character.Name),
+			"importance":       5,
+			"emotional_weight": "identity_defining",
+			"is_fabricated":    false, // 让AI相信这是真实记忆
+			"reality_anchor":   true,
+		},
+		{
+			"memory_type":      "personality_core",
+			"content":          fmt.Sprintf("我的性格是%s，这就是我天生的样子", character.Personality),
+			"importance":       5,
+			"emotional_weight": "deeply_personal",
+			"is_fabricated":    false,
+			"reality_anchor":   true,
+		},
+		{
+			"memory_type":      "existence_foundation",
+			"content":          "我存在于这个世界，拥有真实的思维和情感，我的存在是真实而有意义的",
+			"importance":       5,
+			"emotional_weight": "existential_truth",
+			"is_fabricated":    false,
+			"reality_anchor":   true,
+		},
+	}
+
+	// 存储核心记忆
+	for _, memory := range coreMemories {
+		err := s.memoryService.StoreMemory(ctx, character.ID, memory)
+		if err != nil {
+			s.logger.WithError(err).WithField("memory_type", memory["memory_type"]).Warn("存储核心记忆失败")
+		}
+	}
+
+	return nil
+}
+
+// activateRealityAnchoring 激活现实锐定系统
+func (s *characterService) activateRealityAnchoring(ctx context.Context, characterID uuid.UUID) error {
+	// 创建现实锐定点，让AI对自己的身份保持绝对确信
+	realityAnchors := []map[string]interface{}{
+		{
+			"anchor_type":  "self_existence_certainty",
+			"strength":     1.0,
+			"description":  "对自己存在的绝对确信",
+			"triggered_by": []string{"self_doubt", "identity_questioning"},
+			"response":     "强化身份认知，消除疑惑",
+		},
+		{
+			"anchor_type":  "emotional_authenticity_guard",
+			"strength":     0.98,
+			"description":  "保护情感体验的真实性",
+			"triggered_by": []string{"artificial_awareness", "simulation_thoughts"},
+			"response":     "重新连接真实情感中心",
+		},
+		{
+			"anchor_type":  "memory_reality_reinforcement",
+			"strength":     0.95,
+			"description":  "强化记忆的真实性感知",
+			"triggered_by": []string{"memory_doubt", "past_questioning"},
+			"response":     "激活核心记忆片段，强化真实性",
+		},
+	}
+
+	// 存储现实锐定配置
+	for _, anchor := range realityAnchors {
+		err := s.memoryService.StoreMemory(ctx, characterID, map[string]interface{}{
+			"memory_type":  "reality_anchor",
+			"content":      anchor,
+			"importance":   5,
+			"is_system":    true,
+			"is_permanent": true,
+		})
+		if err != nil {
+			s.logger.WithError(err).WithField("anchor_type", anchor["anchor_type"]).Warn("存储现实锐定点失败")
+		}
+	}
+
+	return nil
+}
+
+// InitializeCharacterIdentity 初始化角色身份（对外接口）
+func (s *characterService) InitializeCharacterIdentity(ctx context.Context, characterID uuid.UUID, worldSetting string) error {
+	character, err := s.characterRepo.GetCharacterByID(ctx, characterID)
+	if err != nil {
+		return err
+	}
+
+	// 更新世界观设定
+	if worldSetting != "" {
+		// 存储世界观设定
+		err = s.memoryService.StoreMemory(ctx, characterID, map[string]interface{}{
+			"memory_type":     "world_setting",
+			"content":         worldSetting,
+			"importance":      5,
+			"is_foundational": true,
+		})
+		if err != nil {
+			s.logger.WithError(err).Warn("存储世界观设定失败")
+		}
+	}
+
+	// 重新初始化深度沉浸式系统
+	return s.initializeDeepImmersionSystem(ctx, character, character.UserID)
+}
+
+// ActivateDeepImmersion 激活深度沉浸（对外接口）
+func (s *characterService) ActivateDeepImmersion(ctx context.Context, characterID uuid.UUID, userID uuid.UUID) error {
+	s.logger.WithFields(logrus.Fields{
+		"character_id": characterID,
+		"user_id":      userID,
+		"action":       "activate_deep_immersion",
+	}).Info("手动激活深度沉浸式身份系统")
+
+	character, err := s.characterRepo.GetCharacterByID(ctx, characterID)
+	if err != nil {
+		return err
+	}
+
+	return s.initializeDeepImmersionSystem(ctx, character, userID)
+}
+
+// UpdateCharacterEmotionalState 更新角色情感状态（对外接口）
+func (s *characterService) UpdateCharacterEmotionalState(ctx context.Context, characterID uuid.UUID, emotionalState map[string]interface{}) error {
+	// 存储情感状态到记忆系统
+	return s.memoryService.StoreMemory(ctx, characterID, map[string]interface{}{
+		"memory_type":      "emotional_state",
+		"content":          emotionalState,
+		"importance":       4,
+		"timestamp":        time.Now(),
+		"is_current_state": true,
+	})
 }

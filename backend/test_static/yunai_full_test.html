@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUNAI 完整功能测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-card .icon {
+            font-size: 1.5em;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .input-group input,
+        .input-group textarea,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .response-area {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .audio-player {
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 YUNAI 完整功能测试</h1>
+            <p>测试所有已开发的核心功能：聊天、朋友圈、群聊、剧情触发、关系网络、语音合成</p>
+        </div>
+        
+        <div class="feature-grid">
+            <!-- 单聊测试 -->
+            <div class="feature-card">
+                <h3><span class="icon">💬</span>单聊测试</h3>
+                <div class="input-group">
+                    <label>消息内容</label>
+                    <textarea id="singleChatMessage" rows="3" placeholder="输入你想对小雨说的话...">你好，小雨！我想和你聊聊天。</textarea>
+                </div>
+                <div class="input-group">
+                    <label>角色ID</label>
+                    <input type="text" id="singleChatCharacter" value="xiaoyu-001" placeholder="角色ID">
+                </div>
+                <button class="btn" onclick="testSingleChat()">发送消息</button>
+                <div id="singleChatResponse" class="response-area">等待测试...</div>
+            </div>
+            
+            <!-- 群聊测试 -->
+            <div class="feature-card">
+                <h3><span class="icon">👥</span>群聊测试</h3>
+                <div class="input-group">
+                    <label>群聊消息</label>
+                    <textarea id="groupChatMessage" rows="3" placeholder="输入群聊消息...">大家好！我想探索一下这个神秘的魔法学院。</textarea>
+                </div>
+                <div class="input-group">
+                    <label>群聊ID</label>
+                    <input type="text" id="groupChatId" value="magic-academy-001" placeholder="群聊ID">
+                </div>
+                <button class="btn" onclick="testGroupChat()">发送群聊</button>
+                <div id="groupChatResponse" class="response-area">等待测试...</div>
+            </div>
+            
+            <!-- 朋友圈测试 -->
+            <div class="feature-card">
+                <h3><span class="icon">📱</span>朋友圈测试</h3>
+                <div class="input-group">
+                    <label>动作类型</label>
+                    <select id="momentsAction">
+                        <option value="get">获取朋友圈</option>
+                        <option value="post">发布动态</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>内容</label>
+                    <textarea id="momentsContent" rows="3" placeholder="朋友圈内容...">今天在花园里读书，发现了一本有趣的魔法书籍~</textarea>
+                </div>
+                <button class="btn" onclick="testMoments()">测试朋友圈</button>
+                <div id="momentsResponse" class="response-area">等待测试...</div>
+            </div>
+            
+            <!-- 关系网络测试 -->
+            <div class="feature-card">
+                <h3><span class="icon">🕸️</span>关系网络测试</h3>
+                <div class="input-group">
+                    <label>关系描述</label>
+                    <textarea id="relationshipDesc" rows="3" placeholder="描述复杂关系...">小雨是我的好朋友，但她的闺蜜小美和我关系有点复杂，表面上是朋友，实际上有竞争关系</textarea>
+                </div>
+                <button class="btn" onclick="testRelationship()">分析关系</button>
+                <div id="relationshipResponse" class="response-area">等待测试...</div>
+            </div>
+            
+            <!-- 世界观测试 -->
+            <div class="feature-card">
+                <h3><span class="icon">🌍</span>世界观探索</h3>
+                <div class="input-group">
+                    <label>探索地点</label>
+                    <input type="text" id="worldLocation" value="魔法学院图书馆" placeholder="探索地点">
+                </div>
+                <div class="input-group">
+                    <label>时间</label>
+                    <input type="text" id="worldTime" value="黄昏时分" placeholder="时间">
+                </div>
+                <button class="btn" onclick="testWorld()">开始探索</button>
+                <div id="worldResponse" class="response-area">等待测试...</div>
+            </div>
+            
+            <!-- 语音合成测试 -->
+            <div class="feature-card">
+                <h3><span class="icon">🎵</span>语音合成测试</h3>
+                <div class="input-group">
+                    <label>文本内容</label>
+                    <textarea id="ttsText" rows="3" placeholder="输入要合成的文本...">你好！我是小雨，很高兴认识你！</textarea>
+                </div>
+                <div class="input-group">
+                    <label>情感</label>
+                    <select id="ttsEmotion">
+                        <option value="happy">开心</option>
+                        <option value="gentle">温柔</option>
+                        <option value="excited">兴奋</option>
+                        <option value="caring">关怀</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="testTTS()">生成语音</button>
+                <div id="ttsResponse" class="response-area">等待测试...</div>
+                <audio id="audioPlayer" class="audio-player" controls style="display: none;"></audio>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🎉 YUNAI - AI 社交与创作平台 | 所有功能基于真实数据库和AI模型</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081/api';
+        
+        function setStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${status}">${status.toUpperCase()}</div>${message}`;
+        }
+        
+        async function apiCall(endpoint, data) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                return await response.json();
+            } catch (error) {
+                throw new Error(`网络错误: ${error.message}`);
+            }
+        }
+        
+        async function testSingleChat() {
+            const message = document.getElementById('singleChatMessage').value;
+            const characterId = document.getElementById('singleChatCharacter').value;
+            
+            setStatus('singleChatResponse', 'loading', '正在发送消息...');
+            
+            try {
+                const result = await apiCall('/chat/single', {
+                    message: message,
+                    user_id: 'test-user-001',
+                    character_id: characterId,
+                    temperature: 0.7,
+                    chat_type: 'single'
+                });
+                
+                setStatus('singleChatResponse', 'success', 
+                    `✅ 单聊成功\n\n🤖 ${characterId} 回复:\n"${result.message}"\n\n😊 情感: ${result.emotion}`);
+            } catch (error) {
+                setStatus('singleChatResponse', 'error', `❌ 单聊失败: ${error.message}`);
+            }
+        }
+        
+        async function testGroupChat() {
+            const message = document.getElementById('groupChatMessage').value;
+            const groupId = document.getElementById('groupChatId').value;
+            
+            setStatus('groupChatResponse', 'loading', '正在发送群聊消息...');
+            
+            try {
+                const result = await apiCall('/chat/group', {
+                    group_id: groupId,
+                    user_id: 'test-user-001',
+                    message: message,
+                    members: ['test-user-001'],
+                    characters: ['xiaoyu-001', 'xiaomei-001'],
+                    temperature: 0.7
+                });
+                
+                setStatus('groupChatResponse', 'success', 
+                    `✅ 群聊成功\n\n👥 群聊回复:\n"${result.message}"`);
+            } catch (error) {
+                setStatus('groupChatResponse', 'error', `❌ 群聊失败: ${error.message}`);
+            }
+        }
+        
+        async function testMoments() {
+            const action = document.getElementById('momentsAction').value;
+            const content = document.getElementById('momentsContent').value;
+            
+            setStatus('momentsResponse', 'loading', '正在处理朋友圈请求...');
+            
+            try {
+                const result = await apiCall('/moments', {
+                    user_id: 'test-user-001',
+                    character_id: 'xiaoyu-001',
+                    action: action,
+                    content: content
+                });
+                
+                setStatus('momentsResponse', 'success', 
+                    `✅ 朋友圈${action === 'get' ? '获取' : '发布'}成功\n\n📱 内容:\n"${result.message}"`);
+            } catch (error) {
+                setStatus('momentsResponse', 'error', `❌ 朋友圈操作失败: ${error.message}`);
+            }
+        }
+        
+        async function testRelationship() {
+            const description = document.getElementById('relationshipDesc').value;
+            
+            setStatus('relationshipResponse', 'loading', '正在分析关系网络...');
+            
+            try {
+                const result = await apiCall('/relationship', {
+                    user_id: 'test-user-001',
+                    character_id: 'xiaoyu-001',
+                    action: 'analyze',
+                    data: {
+                        description: description
+                    }
+                });
+                
+                setStatus('relationshipResponse', 'success', 
+                    `✅ 关系分析完成\n\n🕸️ 分析结果:\n"${result.message}"`);
+            } catch (error) {
+                setStatus('relationshipResponse', 'error', `❌ 关系分析失败: ${error.message}`);
+            }
+        }
+        
+        async function testWorld() {
+            const location = document.getElementById('worldLocation').value;
+            const time = document.getElementById('worldTime').value;
+            
+            setStatus('worldResponse', 'loading', '正在探索世界观...');
+            
+            try {
+                const result = await apiCall('/world', {
+                    user_id: 'test-user-001',
+                    character_id: 'xiaoyu-001',
+                    action: 'explore',
+                    context: {
+                        location: location,
+                        time: time,
+                        mood: '好奇'
+                    }
+                });
+                
+                setStatus('worldResponse', 'success', 
+                    `✅ 世界探索成功\n\n🌍 探索结果:\n"${result.message}"`);
+            } catch (error) {
+                setStatus('worldResponse', 'error', `❌ 世界探索失败: ${error.message}`);
+            }
+        }
+        
+        async function testTTS() {
+            const text = document.getElementById('ttsText').value;
+            const emotion = document.getElementById('ttsEmotion').value;
+            
+            setStatus('ttsResponse', 'loading', '正在生成语音...');
+            
+            try {
+                const result = await apiCall('/voice/tts', {
+                    text: text,
+                    character_id: 'xiaoyu-001',
+                    emotion: emotion,
+                    voice_style: 'gentle'
+                });
+                
+                if (result.success) {
+                    setStatus('ttsResponse', 'success', 
+                        `✅ 语音生成成功\n\n🎵 文本: "${result.text}"\n😊 情感: ${result.emotion}\n🔊 语音ID: ${result.voice_id}`);
+                    
+                    // 如果有音频数据，显示播放器
+                    if (result.audio_data) {
+                        const audioPlayer = document.getElementById('audioPlayer');
+                        audioPlayer.src = `data:audio/mp3;base64,${result.audio_data}`;
+                        audioPlayer.style.display = 'block';
+                    }
+                } else {
+                    setStatus('ttsResponse', 'error', `❌ 语音生成失败: ${result.error || '未知错误'}`);
+                }
+            } catch (error) {
+                setStatus('ttsResponse', 'error', `❌ 语音生成失败: ${error.message}`);
+            }
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 YUNAI 完整功能测试页面已加载');
+            console.log('📡 API 基础地址:', API_BASE);
+        });
+    </script>
+</body>
+</html>

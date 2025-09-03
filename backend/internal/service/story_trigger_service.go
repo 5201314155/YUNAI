@@ -32,7 +32,7 @@ type StoryTriggerService interface {
 }
 
 type storyTriggerService struct {
-	groupChatRepo repository.GroupChatRepository
+	characterRepo repository.CharacterRepository
 	storyRepo     repository.StoryRepository
 	modelService  ModelService
 	logger        *logrus.Logger
@@ -40,13 +40,13 @@ type storyTriggerService struct {
 
 // NewStoryTriggerService 创建剧情触发服务
 func NewStoryTriggerService(
-	groupChatRepo repository.GroupChatRepository,
+	characterRepo repository.CharacterRepository,
 	storyRepo repository.StoryRepository,
 	modelService ModelService,
 	logger *logrus.Logger,
 ) StoryTriggerService {
 	return &storyTriggerService{
-		groupChatRepo: groupChatRepo,
+		characterRepo: characterRepo,
 		storyRepo:     storyRepo,
 		modelService:  modelService,
 		logger:        logger,
@@ -61,7 +61,7 @@ func (s *storyTriggerService) AnalyzeMessageForTriggers(ctx context.Context, req
 	}).Debug("Analyzing message for story triggers")
 
 	// 获取群聊的剧情设定
-	groupChat, err := s.groupChatRepo.GetGroupChatByID(ctx, req.GroupChatID)
+	groupChat, err := s.characterRepo.GetGroupChatByID(ctx, req.GroupChatID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get group chat: %w", err)
 	}
@@ -389,7 +389,7 @@ func (s *storyTriggerService) ExecuteStoryTrigger(ctx context.Context, req *doma
 
 	// 获取目标章节
 	if req.TargetChapterID != nil {
-		chapter, err := s.storyRepo.GetChapterByID(ctx, *req.TargetChapterID)
+		_, err := s.storyRepo.GetChapterByID(ctx, *req.TargetChapterID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get target chapter: %w", err)
 		}
@@ -433,7 +433,7 @@ func (s *storyTriggerService) SwitchChapter(ctx context.Context, req *domain.Cha
 	}
 
 	// 更新群聊的当前章节
-	err = s.groupChatRepo.UpdateCurrentChapter(ctx, req.GroupChatID, req.TargetChapterID)
+	err = s.characterRepo.UpdateCurrentChapter(ctx, req.GroupChatID, req.TargetChapterID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update current chapter: %w", err)
 	}

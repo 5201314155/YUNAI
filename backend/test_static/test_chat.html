@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUNAI 实时聊天测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: 10px;
+        }
+
+        .message.ai .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            margin-right: 10px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #666;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .audio-controls {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .play-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .play-button:hover {
+            background: #45a049;
+        }
+
+        .welcome-button {
+            background: #FF9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .welcome-button:hover {
+            background: #F57C00;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="status-indicator"></div>
+            <h1>🎯 YUNAI 实时聊天测试</h1>
+            <p>与AI助手小雨进行实时语音聊天</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+                <div class="message-bubble">
+                    <div>欢迎使用YUNAI实时聊天系统！我是小雨，你的AI助手。</div>
+                    <div class="message-time">系统消息</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div>🤖 小雨正在思考中...</div>
+        </div>
+
+        <div class="chat-input">
+            <div class="input-container">
+                <input type="text" id="messageInput" class="message-input" placeholder="输入消息..." maxlength="500">
+                <button id="sendButton" class="send-button">发送</button>
+                <button id="welcomeButton" class="welcome-button">欢迎语音</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const welcomeButton = document.getElementById('welcomeButton');
+        const loading = document.getElementById('loading');
+
+        // 添加消息到聊天界面
+        function addMessage(content, isUser = false, audioData = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.textContent = content;
+            bubbleDiv.appendChild(contentDiv);
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString();
+            bubbleDiv.appendChild(timeDiv);
+            
+            // 如果有音频数据，添加播放按钮
+            if (audioData && !isUser) {
+                const audioControls = document.createElement('div');
+                audioControls.className = 'audio-controls';
+                
+                const playButton = document.createElement('button');
+                playButton.className = 'play-button';
+                playButton.textContent = '🔊 播放语音';
+                playButton.onclick = () => playAudio(audioData);
+                
+                audioControls.appendChild(playButton);
+                bubbleDiv.appendChild(audioControls);
+            }
+            
+            messageDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 播放音频
+        function playAudio(base64Data) {
+            try {
+                const audioBlob = base64ToBlob(base64Data, 'audio/mp3');
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                
+                audio.play().catch(error => {
+                    console.error('音频播放失败:', error);
+                    alert('音频播放失败，请检查浏览器设置');
+                });
+                
+                audio.onended = () => {
+                    URL.revokeObjectURL(audioUrl);
+                };
+            } catch (error) {
+                console.error('音频处理失败:', error);
+                alert('音频处理失败');
+            }
+        }
+
+        // Base64转Blob
+        function base64ToBlob(base64, mimeType) {
+            const byteCharacters = atob(base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            return new Blob([byteArray], { type: mimeType });
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // 添加用户消息
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            // 显示加载状态
+            sendButton.disabled = true;
+            loading.classList.add('show');
+
+            try {
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: 'test-user-001',
+                        character_id: 'xiaoyu-001',
+                        model: 'deepseek-ai/DeepSeek-V3',
+                        temperature: 0.8
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    addMessage(data.message, false, data.audio_data);
+                } else {
+                    addMessage(`错误: ${data.error}`, false);
+                }
+            } catch (error) {
+                console.error('发送消息失败:', error);
+                addMessage('发送消息失败，请检查网络连接', false);
+            } finally {
+                sendButton.disabled = false;
+                loading.classList.remove('show');
+            }
+        }
+
+        // 获取欢迎语音
+        async function getWelcome() {
+            welcomeButton.disabled = true;
+            loading.classList.add('show');
+
+            try {
+                const response = await fetch(`${API_BASE}/welcome`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    addMessage(data.message, false, data.audio_data);
+                } else {
+                    addMessage(`错误: ${data.error}`, false);
+                }
+            } catch (error) {
+                console.error('获取欢迎语音失败:', error);
+                addMessage('获取欢迎语音失败，请检查网络连接', false);
+            } finally {
+                welcomeButton.disabled = false;
+                loading.classList.remove('show');
+            }
+        }
+
+        // 事件监听
+        sendButton.addEventListener('click', sendMessage);
+        welcomeButton.addEventListener('click', getWelcome);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 页面加载完成后检查服务器状态
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                console.log('服务器状态:', data);
+            } catch (error) {
+                console.error('无法连接到服务器:', error);
+                addMessage('⚠️ 无法连接到服务器，请确保后端服务正在运行', false);
+            }
+        });
+    </script>
+</body>
+</html>

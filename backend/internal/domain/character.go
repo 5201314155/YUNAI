@@ -11,7 +11,7 @@ import (
 // Character 角色
 type Character struct {
 	ID          uuid.UUID `json:"id" db:"id"`
-	UserID      uuid.UUID `json:"user_id" db:"user_id"`
+	UserID      uuid.UUID `json:"user_id" db:"created_by"`
 	Name        string    `json:"name" db:"name"`
 	Description *string   `json:"description" db:"description"`
 	Personality *string   `json:"personality" db:"personality"`

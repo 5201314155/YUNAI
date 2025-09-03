@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 YUNAI语音播放器</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .audio-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .audio-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .audio-desc {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        audio {
+            width: 100%;
+            height: 40px;
+        }
+        
+        .play-all {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .play-all button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .play-all button:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .status.playing {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.stopped {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 YUNAI语音播放器</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            🔊 测试YUNAI AI语音通话系统生成的语音文件
+        </p>
+        
+        <div class="play-all">
+            <button onclick="playAllAudios()">🎵 播放所有语音</button>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <!-- 最新生成的语音 -->
+        <div class="audio-item">
+            <div class="audio-title">🤗 友好问候</div>
+            <div class="audio-desc">你好！我是YUNAI的AI助手小雨，很高兴为您服务！</div>
+            <audio controls>
+                <source src="greeting.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <div class="audio-item">
+            <div class="audio-title">💝 温暖安慰</div>
+            <div class="audio-desc">我理解你现在的感受，别担心，我会一直陪伴在你身边。</div>
+            <audio controls>
+                <source src="comfort.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <div class="audio-item">
+            <div class="audio-title">🎉 兴奋赞美</div>
+            <div class="audio-desc">太好了！你做得真棒！我为你感到骄傲！</div>
+            <audio controls>
+                <source src="praise.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <div class="audio-item">
+            <div class="audio-title">🌙 温柔晚安</div>
+            <div class="audio-desc">晚安，好梦！明天又是美好的一天。</div>
+            <audio controls>
+                <source src="goodnight.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <!-- 聊天对话语音 -->
+        <div class="audio-item">
+            <div class="audio-title">💬 聊天问候</div>
+            <div class="audio-desc">自动聊天生成的问候语音</div>
+            <audio controls>
+                <source src="auto_chat_1_问候.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <div class="audio-item">
+            <div class="audio-title">🤗 聊天安慰</div>
+            <div class="audio-desc">自动聊天生成的安慰语音</div>
+            <audio controls>
+                <source src="auto_chat_2_安慰.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <div class="audio-item">
+            <div class="audio-title">💪 聊天鼓励</div>
+            <div class="audio-desc">自动聊天生成的鼓励语音</div>
+            <audio controls>
+                <source src="auto_chat_3_鼓励.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <!-- 情感语音 -->
+        <div class="audio-item">
+            <div class="audio-title">😊 开心情感</div>
+            <div class="audio-desc">测试开心情感的语音表达</div>
+            <audio controls>
+                <source src="emotion_happy.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <div class="audio-item">
+            <div class="audio-title">💝 关怀情感</div>
+            <div class="audio-desc">测试关怀情感的语音表达</div>
+            <audio controls>
+                <source src="emotion_caring.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+        
+        <div class="audio-item">
+            <div class="audio-title">🎉 兴奋情感</div>
+            <div class="audio-desc">测试兴奋情感的语音表达</div>
+            <audio controls>
+                <source src="emotion_excited.mp3" type="audio/mpeg">
+                您的浏览器不支持音频播放。
+            </audio>
+        </div>
+    </div>
+    
+    <script>
+        let currentAudioIndex = 0;
+        let audioElements = [];
+        let isPlaying = false;
+        
+        // 获取所有音频元素
+        window.onload = function() {
+            audioElements = document.querySelectorAll('audio');
+            console.log(`找到 ${audioElements.length} 个音频文件`);
+        };
+        
+        // 播放所有音频
+        function playAllAudios() {
+            if (isPlaying) {
+                stopAllAudios();
+                return;
+            }
+            
+            isPlaying = true;
+            currentAudioIndex = 0;
+            showStatus('正在播放语音...', 'playing');
+            
+            playNextAudio();
+        }
+        
+        // 播放下一个音频
+        function playNextAudio() {
+            if (currentAudioIndex >= audioElements.length) {
+                showStatus('所有语音播放完成！', 'stopped');
+                isPlaying = false;
+                return;
+            }
+            
+            const audio = audioElements[currentAudioIndex];
+            audio.currentTime = 0;
+            
+            audio.onended = function() {
+                currentAudioIndex++;
+                setTimeout(playNextAudio, 1000); // 1秒间隔
+            };
+            
+            audio.onerror = function() {
+                console.log(`音频 ${currentAudioIndex + 1} 播放失败`);
+                currentAudioIndex++;
+                setTimeout(playNextAudio, 500);
+            };
+            
+            audio.play().catch(function(error) {
+                console.log(`播放失败: ${error}`);
+                currentAudioIndex++;
+                setTimeout(playNextAudio, 500);
+            });
+        }
+        
+        // 停止所有音频
+        function stopAllAudios() {
+            audioElements.forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
+            isPlaying = false;
+            showStatus('播放已停止', 'stopped');
+        }
+        
+        // 显示状态
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            if (type === 'stopped') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 自动播放第一个音频（需要用户交互）
+        document.addEventListener('click', function() {
+            // 第一次点击时尝试播放第一个音频
+            if (audioElements.length > 0 && !isPlaying) {
+                console.log('准备播放第一个音频');
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
